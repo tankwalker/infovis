@@ -1,0 +1,197 @@
+@CHARSET "UTF-8";
+
+/****** D3 topojson ******/
+.background {
+	fill:none;
+}
+
+path {
+	fill: gray;
+}
+
+.region {
+	stroke: black;
+	stroke-width: 0.5;
+}
+
+.region.active {
+	fill: orange;
+	stroke: white;
+	stroke-width: 1px;
+}
+
+.region.highlight {
+	stroke: white;
+	stroke-width: 1;
+	fill: #ccc;
+}
+
+
+/***** HTML-CSS *****/
+
+/* Elements */
+* {
+	color: white;
+	/* font-family: 'Fanwood Text', serif; */
+	font-family: 'Raleway', sans-serif;
+	font-weight: 200;
+	margin: 0px;
+}
+
+body {
+	background-color: #222;
+}
+
+header {
+	font-size: 30pt;
+	font-weight: 400;
+}
+
+h1 {
+	font-size: 20pt;
+	font-weight: 200;
+}
+
+h2 {
+	color: #ffcc00;
+	font-size: 18pt;
+	font-weight: 200;
+}
+
+h3 {
+	
+}
+
+/* Classes */
+.ball {
+	display: inline-block;
+	width: 15px;
+	vertical-align: middle;
+}
+
+.bullet { font: 10px sans-serif; display: block; }
+.bullet .marker { stroke: #000; stroke-width: 2px; }
+.bullet .tick line { stroke: #eee; stroke-width: .5px; }
+.bullet .tick text {fill: #eee;}
+.bullet .range.r0 { fill: #333; stroke: white;}
+.bullet .range.r1 { fill: #ccc; }
+.bullet .range.r2 { fill: #999; }
+.bullet .range .bg { fill: #fff; }
+.bullet .measure.m0 { fill: #ff432d/*#009020*/; }
+.bullet .measure.m1 { fill: lightsteelblue; }
+.bullet .title { font-size: 14px; font-weight: bold; fill: #fff;}
+.bullet .subtitle { fill: #eee; }
+
+.bar {
+	fill: #ffffff;
+}
+
+.inline {
+	display: inline-block;
+}
+
+.entry {
+    width: 250px;
+    background-color: rgba(255, 255, 255, .2);
+    padding: 5px;
+    margin: 1.5px;
+    color: #fff;
+    font-weight: 300;
+    font-size: 14pt;
+}
+
+.entry:hover {
+    background-color: rgba(255, 255, 255, .4);
+}
+
+.section {
+	/*background-color: rgba(71,71,71,0.8);*/
+}
+
+.textpie {
+	text-align: center;
+	font-weight: bold;
+	font-size: 10pt;
+}
+
+.visible {
+	display: block;
+}
+
+.ranking {
+	stroke: #fff;
+	stroke-width: 1.5px;
+	fill: #fff;
+	fill-opacity: .4;
+}
+
+.invisible {
+	display: none;
+}
+
+/* IDs */
+
+#lside {
+	min-width: 380px;
+/* 	position: absolute;
+	top: 20px;
+	left: 10px, */
+	margin: 8px;
+}
+
+#hotels {
+	min-width: 400px;
+	position: absolute;
+	top: 50px;
+	right: 10px;
+}
+
+#map {
+	position: absolute;
+	top: 80px;
+	left: 450px;
+}
+
+#sentiment {
+	position: absolute;
+	/* bottom: 10px;
+	right: 10px; */
+	width: 100%;
+	background: rgba(0, 0, 0, .3);
+	margin: 8px;
+	padding: 10px;
+}
+
+/* TABLES */
+table {
+  max-width: 100%;
+  background-color: transparent;
+}
+th {
+  text-align: left;
+  font-weight: bold;
+}
+.table {
+  width: 100%;
+  margin-bottom: 20px;
+}
+.table > thead > tr > th,
+.table > tbody > tr > th,
+.table > tfoot > tr > th,
+.table > thead > tr > td,
+.table > tbody > tr > td,
+.table > tfoot > tr > td {
+  padding: 8px;
+  line-height: 1.42857143;
+  vertical-align: top;
+  border-top: 1px solid #ddd;
+}
+.table > thead > tr > th {
+  vertical-align: bottom;
+  border-bottom: 2px solid #ddd;
+}
+
+.table-hover > tbody > tr:hover > td,
+.table-hover > tbody > tr:hover > th {
+  background-color: #555;
+}

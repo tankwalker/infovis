@@ -1,0 +1,79 @@
+use infovis;
+
+create table if not exists hotel (
+	name varchar(20) not null,
+	region varchar(20) not null,
+	address varchar(50),
+	primary key (name, region, address)
+);
+
+create table if not exists coffee (
+	id int auto_increment unique key,
+	name varchar(20) not null primary key
+);
+
+create table if not exists feedback (
+	id int auto_increment primary key,
+	sendtime datetime not null,
+	hotel varchar(20) not null references hotel (name),
+	flavour int,
+	freshness int,
+	temperature int,
+	service int,
+	country varchar(20)
+);
+
+create table if not exists sell (
+	selldate date not null,
+	coffee varchar(20) not null references coffee (name),
+	hotel varchar(20) not null references hotel (name),
+	quantity float not null
+);
+
+create table if not exists procapita (
+	nationality varchar(20) not null primary key,
+	quantity float not null
+);
+
+/** DATA **/
+insert into hotel values
+	('Palatino', 'Lazio', 'Via quellochevuoi, 12'),
+	('Superior', 'Lazio', null),
+	('Park Holel', 'Lazio', null),
+	('Park Holel', 'Abruzzo', null),
+	('Magnola', 'Abruzzo', null),
+	('Excelsior', 'Toscana', null),
+	('Accor Hotels', 'Toscana', null),
+	('Accor Holels', 'Marche', null);
+	
+insert into coffee values
+	(null, '95deg'),
+	(null, '1950m'),
+	(null, '50g'),
+	(null, '18c');
+
+insert into feedback values
+	(null, now(), 'Palatino', 3, 3, 4, 3, 'Italia'),
+	(null, now(), 'Palatino', 4, 3, 4, 3, 'Italia'),
+	(null, now(), 'Palatino', 3, 2, 2, 3, 'Germania'),
+	(null, now(), 'Palatino', 3, 3, 2, 4, 'Francia'),
+	(null, now(), 'Palatino', 3, 2, 4, 3, 'Francia'),
+	(null, now(), 'Palatino', 2, 3, 4, 3, 'USA'),
+	(null, now(), 'Palatino', 3, 3, 4, 3, 'USA'),
+	(null, now(), 'Palatino', 3, 2, 3, 4, 'Italia'),
+	(null, now(), 'Palatino', 4, 3, 4, 3, 'Germania'),
+	(null, now(), 'Palatino', 3, 2, 3, 2, 'UK'),
+	(null, now(), 'Palatino', 3, 3, 4, 3, 'UK'),
+	(null, now(), 'Superior', 4, 3, 3, 4, 'Italia'),
+	(null, now(), 'Superior', 4, 3, 4, 3, 'Italia'),
+	(null, now(), 'Superior', 3, 2, 2, 3, 'Germania'),
+	(null, now(), 'Superior', 3, 3, 2, 4, 'Francia'),
+	(null, now(), 'Superior', 2, 2, 4, 3, 'Francia'),
+	(null, now(), 'Superior', 2, 4, 4, 3, 'USA'),
+	(null, now(), 'Excelsior', 2, 3, 4, 3, 'USA'),
+	(null, now(), 'Excelsior', 3, 2, 3, 4, 'Italia'),
+	(null, now(), 'Excelsior', 3, 3, 4, 3, 'Germania'),
+	(null, now(), 'Excelsior', 2, 4, 4, 2, 'UK'),
+	(null, now(), 'Excelsior', 3, 2, 3, 4, 'UK');
+		
+
