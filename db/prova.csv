@@ -1,0 +1,21 @@
+region,hotel,flavour,freshness,temperature,service,country
+Lazio,"Park Hotel",3,4,3,3,Italia
+Lazio,Superior,2,3,4,3,Italia
+Lazio,"Park Hotel",4,4,3,3,USA
+Lazio,"Park Hotel",3,4,2,3,UK
+Lazio,Superior,4,3,4,4,Germania
+Lazio,Superior,3,2,4,4,Francia
+Abruzzo,"Park Hotel",4,4,2,4,Francia
+Abruzzo,"Park Hotel",3,4,2,4,Danimarca
+region,hotel,flavour,freshness,temperature,,
+Lazio,"Park Hotel",3,2,3,,
+Lazio,"Park Hotel",4,3,4,,
+Lazio,Superior,3,3,4,2,UK
+Abruzzo,"Monte Magnola",2,3,2,,UK
+Abruzzo,"Park Hotel",3,3,3,,UK
+,,,,,,
+,,,,,,
+,,,,,,
+,,,,,,
+,,,,,,
+,,,,,,

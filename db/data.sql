@@ -1,0 +1,11 @@
+INSERT INTO `feedback` (`id`, `sendtime`, `hotel`, `flavour`, `freshness`, `temperature`, `service`, `country`) VALUES
+(null, now(), 'Accor Hotel', 4, 3, 2, 3, 'UK'),
+(null, now(), 'Accor Hotel', 3, 2, 4, 3, 'Italia'),
+(null, now(), 'Accor Hotel', 2, 3, 3, 4, 'Francia'),
+(null, now(), 'Accor Hotel', 3, 2, 4, 3, 'Francia'),
+(null, now(), 'Accor Hotel', 3, 3, 2, 2, 'USA'),
+(null, now(), 'Accor Hotel', 3, 2, 4, 3, 'Francia'),
+(null, now(), 'Accor Hotel', 2, 3, 4, 3, 'USA'),
+(null, now(), 'Accor Hotel', 4, 3, 2, 3, 'Italia'),
+(null, now(), 'Accor Hotel', 2, 3, 4, 4, 'Germania'),
+(null, now(), 'Accor Hotel', 3, 2, 3, 3, 'Germania'),

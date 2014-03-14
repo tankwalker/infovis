@@ -1,0 +1,144 @@
+/**
+ * Builds the charts relative to the sentiment analisys
+ * of the selected hotel within the selected region.
+ */
+function sentimentBuild(){
+	var margin = {top:40, right:10, bottom:10, left:10};
+	
+	var width = 40,
+		height = 300;
+	
+	var thickness = 20;
+	var length = 200;
+	
+	var vertical = true;
+	var plotTick = false;
+		
+	// Loads data
+//	d3.csv(sentimentUrl, function(error, data){
+		var pack = packSentiment(sentiment, ["region", "hotel"]);
+	
+		var bar = d3.scale.linear()
+	        .domain([0, 5])
+	        .range([0, length]);
+		
+		var svg = d3.select("#feedback").selectAll("svg")
+			.data(pack.keys)
+			.enter().append("svg")
+				.attr("class", "bullet")
+				.attr("width", width + margin.left + margin.right)
+				.attr("height", height + margin.top + margin.bottom)
+			.append("g")
+			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		//TODO
+//		var bg = svg.selectAll(".bg")
+//			.data(pack.keys)
+//			.enter().append("rect")
+//				.attr("class", "bg")
+//				.attr("width", width)
+//				.attr("height", height);
+		
+		var label = svg.append("g")
+			.attr("transform", "translate(" + 0 + "," + -10 + ")")
+			.append("text")
+				.attr("class", "title")
+				.attr("x", 0)
+	//			.style("text-anchor", "end")
+				.text(function(d){return d;});
+		
+		if(plotTick){
+		      // Compute the tick format.
+		      var format = bar.tickFormat(5);
+		
+		      // Update the tick groups.
+		      var tick = svg.selectAll("tick")
+			      .data(bar.ticks(5), function(d){return format(d);})
+			      .enter().append("g")
+			      .attr("transform", function(d){return "translate(" + vertical ? "0," + bar(d) : bar(d) + ",0" + ")";})
+			      .attr("class", "tick")
+			      .style("opacity", 0);
+		      
+		      tick.append("line")
+		      	.attr(vertical ? "x1" : "y1", thickness)
+		      	.attr(vertical ? "x2" : "y2", thickness / 7 * 6);
+		      
+		      tick.append("text")
+		      	.attr(vertical ? "dx" : "dy", 5)
+		      	.attr(vertical ? "x" : "y", thickness * 7 / 6)
+		      	.style("text-anchor", "middle");
+	      }
+		
+		// Updates data
+		dispatch.on("regionChange.sentiment", function(){
+			var data;
+
+			regionSelected.hotel = "Park Hotel";		//TODO: debug!
+			data = pack.bullet(regionSelected.name, regionSelected.hotel);
+
+			data.forEach(function(bullet){
+				var rangez = bullet.ranges.sort(d3.descending);
+				var measurez = bullet.measures.sort(d3.descending);
+				var markerz = bullet.markers.sort(d3.descending);
+
+				// Update the range rects.
+				var range = svg.selectAll("rect.range");
+
+				range.data(rangez)
+					.enter().append("rect")
+					.attr("class", function(d, i) { return "range r" + i; })
+					.attr("height", vertical ? 0 : thickness)
+					.attr("width", vertical ? thickness : 0)
+					.attr("x", 0)
+					.attr("y", vertical ? length : 0);
+
+				range.data(rangez)
+					.transition()
+					.duration(duration)
+					.attr(vertical ? "height" : "width", function(d){return bar(d);})
+					.attr("y", vertical ? function(d){ return length - bar(d); } : 0);
+
+				
+				// Update the measure rects.
+				var measure = svg.selectAll("rect.measure");
+				
+				measure.data(measurez)
+					.enter().append("rect")
+					.attr("class", function(d, i){return "measure m" + i;})
+					.attr("height", vertical ? 0 : thickness / 3)
+					.attr("width", vertical ? thickness / 3 : 0)
+					.attr("x", vertical ? thickness / 3 : 0)
+					.attr("y", vertical ? length : thickness / 3);
+
+				measure.data(measurez)
+					.transition()
+					.duration(duration)
+					.attr(vertical ? "height" : "width", function(d){return bar(d);})
+					.attr("y", vertical ? function(d){ return length - bar(d); } : 0);
+
+				// Update the marker lines.
+				var marker = svg.selectAll("line.marker");
+				
+				marker.data(markerz)
+					.enter().append("line")
+					.attr("class", "marker")
+					.attr(vertical ? "x1" : "y1", thickness / 6)
+					.attr(vertical ? "x2" : "y2", thickness * 5 / 6);
+
+				marker.data(markerz)
+					.transition()
+					.duration(duration)
+					.attr(vertical ? "y1" : "x1", function(d){return bar(d);})
+					.attr(vertical ? "y2" : "x2", function(d){return bar(d);});
+				
+			});
+			
+			if(plotTick){
+				// Transition the updating ticks to the new scale, x1.
+				var tickUpdate = tick.transition()
+				.duration(duration)
+				.style("opacity", 1);
+			}
+		});
+//	});	
+}
