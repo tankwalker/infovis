@@ -1,3 +1,4 @@
 # GitIgnore
 
 json/builds
+/crossfilter-gh-pages

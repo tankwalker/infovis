@@ -334,8 +334,6 @@ function mapBuild(){
 		.enter().append("circle")
 			.attr("class", "ranking");
 	
-	var hotels = hotelList();
-	
 	function drawMap(){
 		sub.selectAll(".region")
 			.attr("d", path);
@@ -366,10 +364,19 @@ function mapBuild(){
 			regionSelected.focus = true;
 			
 			// List all the hotel for the selected region
-//			hotels.draw(regionSelected.name);
-			feedback.filterRegion(name);
-			feedback.visible(true)
-				.renderAll();
+			feedback.filterRegion(regionSelected.name)
+				.filterHotel(null)
+				.visible(true)
+				.renderAll()
+				.renderHList();
+			
+			// Show the sentiment section
+			div.transition()
+				.duration(duration)
+				.style("opacity", 1)
+				.each("start", function(){
+					div.style("display", "block");
+				});
 			
 			// Dispatch the stateChange event to update all the charts
 			dispatch.regionChange(regionSelected.name);
@@ -392,19 +399,20 @@ function mapBuild(){
 					div.style("display", "none");
 				});
 			
-			// Clear hotel list
-			feedback.visible(false);
+			// Clear sentiment analysis section
+			feedback
+				.filterRegion(null)
+				.filterHotel(null)
+				.visible(false);
 			dispatch.updateFeedback(null);
 			
-			// Clear all the charts
-//			dispatch.regionChange(null);
 		}
 		
 		// Center and zoom the map
 		sub.transition()
-		.duration(duration)
-		.attr("transform", "translate(" + width/2 + "," + height/2 + ")scale(" + zoom + ")translate(" + -x + "," + -y + ")")
-		.style("stroke-width", "3px");
+			.duration(duration)
+			.attr("transform", "translate(" + width/2 + "," + height/2 + ")scale(" + zoom + ")translate(" + -x + "," + -y + ")")
+			.style("stroke-width", "3px");
 	
 		gcircles.selectAll("circle").transition()
 			.duration(duration)
@@ -418,17 +426,15 @@ function mapBuild(){
 	};
 	
 	function highlight(region){
-		console.log("highlight '" + regionSelected.name + "' region data");
-
 		if(regionSelected.focus)
 			return;
 		
-		// Mouse is exited from map and no selectino was made
+		// Mouse is exited from map and no selection was made
 		if(region == null){
 			sub.selectAll("path")
 				.classed("highlight", false);
 			
-			// Restore mean values of the state TODO: to implement
+			feedback.filterRegion(null);
 		} else {
 		
 		// Select the region
@@ -441,6 +447,11 @@ function mapBuild(){
 			sub.selectAll("path")
 				.classed("highlight", regionSelected && function(d){ return d === regionSelected.path; });
 	
+			// List all the hotel for the selected region
+			feedback.filterRegion(regionSelected.name)
+				.filterHotel(null)
+				.renderTurist();
+			
 			// Dispatch the stateChane event to update all the charts
 			dispatch.regionChange(regionSelected.name);
 		}
@@ -594,125 +605,7 @@ function coffeeCompBuild(){
 	dispatch.on("resize.coffee.fan", resize);
 };
 
-/**
- * Builds the donuts graph which represents the composition of coffee
- * consumption in the selected region
- */
-function barChart(div){
-	var width = 300,
-		height = 150;
-	
-	var thickness = 20;			// height of a single bar
-	var labelWidth = 60;		// width of the label
-	var margin = {left:10, top:0, right:70, bottom:0};
-	
-	var data;
-
-	var color;
-	var pos,
-		bar;
-	
-	var svg = d3.select(div).append("svg");
-	
-	function setBoundaries(w, h){
-		width = w * detailDim.ratio;
-
-		pos.rangeRoundBands([0, height], .5, .7);
-		bar.range([0, width - labelWidth - margin.left - margin.right]);
-		
-		svg.attr("width", width)
-			.attr("height", height)
-			.attr("transform", "translate(" + margin.left + "," + margin.top  + ")");
-	}
-	
-	function render(){
-		svg.selectAll(".bar").data(pack)
-			.enter().append("rect")
-				.attr("class", "bar")
-				.attr("x", labelWidth)
-				.attr("y", function(d, i){ return i * pos.rangeBand(); })
-				.attr("width", 0)
-				.attr("height", thickness)
-				.style("fill", function(d, i){	return color(i); });
-		
-		
-		svg.selectAll(".label").data(pack)
-			.enter().append("text")
-				.attr("class", "label")
-				.attr("x", 0)
-				.attr("y", function(d, i){ return i * pos.rangeBand(); })
-				.attr("dy", 15)
-				.style("fill", "#777")
-				.style("font-weight", "bold")
-				.text(function(d){ return d.key; });
-		
-		svg.selectAll(".textbar").data(pack)
-			.enter().append("text")
-				.attr("class", "textbar")
-				.attr("x", 0)
-				.attr("y", function(d, i){ return i * pos.rangeBand(); })
-				.attr("dy", 15)
-				.style("fill", "#fff")
-				.style("opacity", 0)
-				.style("font-weight", "bold");
-	};
-	
-	/**
-	 * Updates data
-	 * @returns
-	 */
-	function stateChange(region){
-//		var region = regionSelected.name;
-		var data = pack.extract(region);
-		
-		var rect = svg.selectAll(".bar");
-		var label = svg.selectAll(".label");
-		var text = svg.selectAll(".textbar");
-
-		if(!data){
-			rect.transition()
-				.duration(duration)
-				.attr("width", 0);
-			
-//			label.transition()
-//				.duration(duration)
-//				.style("opacity", 0);
-
-			text.transition()
-				.duration(duration)
-				.attr("x", 0)
-				.style("opacity", 0);
-			
-			error = new Error("No region data for '" + region + "'");
-			console.warn(error);
-			return error;
-		}
-		
-		rect.transition()
-			.duration(duration)
-			.attr("width", function(d){ return bar(data[d]); });
-			
-//		label.style("opacity", 1);
-		
-		text.transition()
-			.duration(duration)
-			.text(function(d){ return data[d] + " Kg"; })
-			.attr("x", function(d){ return bar(data[d]) + labelWidth + 10; })
-			.style("text-align", "center")
-			.style("opacity", 1);
-	};
-		
-	function resize(w, h){
-		setBoundaries(w, height);
-		stateChange();
-	};
-	
-	setBoundaries(window.w, window.h);
-	draw();
-	
-	dispatch.on("regionChange.coffee.fan", stateChange);
-	dispatch.on("resize.coffee.fan", resize);
-};
+;
 
 /**
  * Build the chart representing the consume percentage of coffee
@@ -877,550 +770,6 @@ function buildChord(data){
 }
 
 /**
- * Builds the pie chart that represents nationality composition
- * of the turists in the selected region
- */
-function turistNationalityBuild() {
-	var width = detailDim.min,
-		height = 150;
-	
-	var labelWidth = 70;		// width of the label
-	var margin = {left:10, top:0, right:70, bottom:0};
-
-	var pack = packInfo(turist, ["region"]);
-
-	var color = d3.scale.linear()
-		.range(["#6685e0", "#001a4c"])
-		.domain([0, pack.keys.length]);
-	
-	var svg = d3.select("#turist-chart").append("svg")
-		.attr("width", width)
-		.attr("height", height)
-		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-	
-	var bar = d3.scale.linear()
-		.domain([0, pack.top]);
-
-	var pos = d3.scale.ordinal()
-		.domain([0, pack.keys.length]);
-
-	function setBoundaries(w, h){
-		width = w * detailDim.ratio;
-		
-		pos.rangeRoundBands([0, height], .5, .7);
-		bar.range([0, width - labelWidth - margin.left - margin.right]);
-		
-		svg.attr("width", width)
-			.attr("height", height)
-			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-	};
-	
-	function draw(){
-		svg.selectAll(".bar").data(pack.keys)
-			.enter().append("rect")
-			.attr("class", "bar")
-			.attr("x", labelWidth)
-			.attr("y", function(d, i){return pos.rangeBand() * i;})
-			.attr("width", 0)
-			.attr("height", 20)
-			.style("fill", function(d, i){return color(i);})
-			.on("mouseover", function(d) { highlight(d, this); })
-			.on("mouseout", function(d) { highlight(null); });
-	
-		svg.selectAll(".label").data(pack.keys)
-			.enter().append("text")
-				.attr("class", "label")
-				.attr("x", -100)
-				.attr("y", function(d, i){ return i * pos.rangeBand(); })
-				.attr("dy", 15)
-				.style("fill", "#777")
-				.style("font-weight", "bold")
-				.text(function(d){return d.capitalize();});
-		
-		svg.selectAll(".textbar").data(pack.keys)
-			.enter().append("text")
-			.attr("class", "textbar")
-			.attr("x", 0)
-			.attr("y", function(d, i){ return i * pos.rangeBand(); })
-			.attr("dy", 15)
-			.style("fill", "#fff")
-			.style("font-weight", "bold");
-	};
-	
-	function stateChange(region){
-		var data = pack.extract(region);
-		
-		var rect = svg.selectAll(".bar");
-		var label = svg.selectAll(".label");
-		var text = svg.selectAll(".textbar");
-		
-		if(!data){
-			rect.transition()
-			.duration(duration)
-			.attr("width", 0);
-		
-//			label.transition()
-//				.duration(duration)
-//				.style("opacity", 0);
-			
-			text.transition()
-				.duration(duration)
-				.attr("x", 0)
-				.style("opacity", 0);
-			
-			error = new Error("No region data for '" + region + "'");
-			console.warn(error);
-			return error;
-		}
-		
-		rect.transition()
-			.duration(duration)
-			.attr("width", function(d){return bar(data[d]);});
-		
-		svg.selectAll(".label")
-			.attr("x", 0)
-			.style("opacity", 1);
-		
-		svg.selectAll(".textbar").transition()
-			.duration(duration)
-			.attr("x", function(d){return bar(data[d]) + labelWidth + 10;})
-			.style("text-align", "center")
-			.style("opacity", 1)
-			.text(function(d){return data[d];});
-	};
-	
-	function highlight(d, cx){
-		if(!d){
-			feedbackByCountry.filterAll();
-			return;
-		}
-		
-		feedbackByCountry.filter(d);
-		feedlist.render();
-	}
-	
-	function resize(w, h){
-		setBoundaries(w, h);
-		stateChange();
-	};
-	
-	setBoundaries(window.w, window.h);
-	draw();
-	
-	dispatch.on("regionChange.turist", stateChange);
-	dispatch.on("resize.turist", resize);
-}
-
-function feedbacksInit(data){
-	feedback = crossfilter(data);
-	
-	// Key set. All the headers of the input file are listed here
-	var keys = ["flavour", "freshness", "temperature", "service"];
-	
-	// Create new dimensions in the crossfilter to filter feedbacks
-	feedbackByRegion = feedback.dimension(function(d){ return d.region; });
-	feedbackByHotel = feedback.dimension(function(d){ return d.hotel; });
-	feedbackByHotelFilter = feedback.dimension(function(d){ return d.hotel; });
-	feedbackByCountry = feedback.dimension(function(d){ return d.country; });
-	feedbackByKey = {
-			group:function(){
-				var res = [];
-
-				keys.forEach(function(key, idx){
-					var sum = feedbackByKey[key].groupAll().reduceSum(function(d){ return +d[key]; }).value();
-					var count = feedbackByKey[key].groupAll().reduceCount().value();
-					var extent = d3.extent(feedbackByKey[key].top(Infinity), function(d){ return +d[key]; });
-					res.push({key:key, sum:sum, count:count, mean:sum/count, ranges:extent});
-				});
-
-				return res;
-			},
-	};
-	keys.forEach(function(key){
-		feedbackByKey[key] = feedback.dimension(function(d){ return d[key]; });
-	});
-	
-	function reduceToRankAdd(p, v){
-		keys.forEach(function(d){
-			p.sum += d[key];
-			p.mean = p.sum / keys.length;
-		});
-		
-		return p;
-	}
-	
-	function reduceToRankRemove(p, v){
-		return p;
-	}
-	
-	function reduceToRankInit(){
-		return {sum:0, mean:0};
-	}
-}
-
-function computeBullets(hotelName){
-	
-	feedbackByHotel.filterAll();
-	
-	var regionValue = feedbackByKey.group();
-
-	// Filter feedbacks by hotel
-	feedbackByHotel.filter(hotelName);
-	
-	var hotelValue = feedbackByKey.group();
-	
-	var bullets = [];
-	keys.forEach(function(key, idx) {
-		var bullet = {
-				measures:[hotelValue[idx].mean],
-				ranges:hotelValue[idx].ranges,
-				markers:[regionValue[idx].mean]
-			};
-		bullets.push(bullet);
-	});
-	
-	return bullets;
-}
-
-/**
- * Returns the list of all available hotels in the
- * selected region.
- */
-function hotelList(){
-	var list = {};
-	
-	var width = 200,
-		height = 400;
-	
-	var feedList;
-	
-	var margin = {left:10, top:10, right:10, bottom:10};
-	
-	var pos = d3.scale.ordinal();
-	
-	var svg = d3.select("#hotels").append("div");
-	
-	function setBoundaries(w, h){
-		width = w * 0.2;
-		
-		pos.rangeBands([0, height], .2, .5);
-		
-//		svg.attr("width", width)
-//			.attr("height", height)
-//			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-		
-//		background.attr("width", width)
-//			.attr("height", height)
-//			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-	}
-	
-	list.draw = function(regionName){
-		if(!regionName){
-			svg.selectAll(".entry").remove();
-			return;
-		}
-		
-		var limit = 50;
-		
-		// Filter all the feedbacks in the selected region
-		feedbackByRegion.filter(regionName);
-		feedbackByHotel.filterAll();
-		
-		// Retrieve only the hotel whose value is != 0, so they belong to selected region
-		var hotelInRegion = feedbackByHotel.group()
-			.order(function(d){ return d.value; })
-			.top(limit)
-			.filter(function(d){ return d.value; });
-		
-		var entry = svg.selectAll(".entry").data(hotelInRegion, function(d){ return d.key; });
-		
-		var tableHeaders = ["date", "flavour", "freshness", "temperature", "service", "country"];
-		feedlist = feedbackList()
-			.keys(tableHeaders)
-			.render(feedbackByHotel.top(limit));
-		
-		// Adds new hotel names into the list belonging to the choosed region
-		entry.enter().append("div")
-			.attr("class", "entry")
-			.text(function(d){ return d.key.capitalize(); })
-			.on("mouseover", updateFeedback);
-		
-		// And removes the old one that do not belong to the selected region
-		entry.exit().remove();
-	};
-	
-	list.show = function(visible){
-		if(visible){
-			svg.transition()
-				.duration(100)
-				.attr("display", "block");
-		} else {
-			svg.transition()
-			.duration(100)
-			.attr("display", "none");
-		}
-	};
-	
-	function updateFeedback(data){
-		var hotelName = data.key;
-		var bullets = computeBullets(hotelName);
-		
-		if(!bullets){
-			console.warn("No feedback are found for '" + hotelName +"'");
-			return;
-		}
-		
-		d3.select("#sentiment > #hotel-name")
-			.text(hotelName);
-		
-		dispatch.updateFeedback(bullets);
-	}
-	
-	function resize(w, h){
-		setBoundaries(w, h);
-		draw();
-	}
-	
-	setBoundaries(window.w, window.h);
-	
-	dispatch.on("resize.hotels", resize);
-	
-	return list;
-}
-
-/**
- * Builds the charts relative to the sentiment analisys
- * of the selected hotel within the selected region.
- */
-function sentimentBuild(){
-	var margin = {top:30, right:10, bottom:10, left:10};
-	
-	var width = 80,
-		height = 250;
-	
-	var thickness = 20;
-	var length = 250;
-	
-	var vertical = false;
-	var plotTick = true;
-
-	var keys = ["flavour", "freshness", "temperature", "service"];
-	
-	var bar = d3.scale.linear()
-        .domain([0, 5])
-        .range([0, length]);
-	
-	var svg = d3.select("#feedback").selectAll("svg")
-		.data(keys)
-		.enter().append("svg")
-			.attr("class", "bullet")
-			.attr("width", vertical ? width + margin.left + margin.right : 400)
-			.attr("height", vertical ? height + margin.top + margin.bottom: 80)
-		.append("g")
-		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-	var title = svg.append("g")
-		.attr("transform", function(){ var x=0, y=0;
-				x = vertical ? 0 : 0;
-				y = vertical ? height : -10;
-				return "translate(" + x + "," + y + ")";
-			})
-		.append("text")
-			.attr("class", "title")
-			.attr("x", 0)
-			.attr("opacity", 0)
-			.text(function(d){ return d.capitalize(); });
-	
-	var tick = null;
-	
-	if(plotTick){
-	      // Compute the tick format.
-	      var format = bar.tickFormat(5);
-	
-	      // Update the tick groups.
-	      tick = svg.selectAll("tick")
-		      .data(bar.ticks(5), function(d){ return format(d); })
-		      .enter().append("g")
-		      .attr("transform", function(d){ 
-		    	  var x = vertical ? 7 : bar(d);
-		    	  var y = vertical ? bar(d) : 7;
-		    	  return "translate(" + x + "," + y + ")";
-		    	  })
-		      .attr("class", "tick")
-		      .style("opacity", 0);
-	      
-	      tick.append("line")
-	      	.attr(vertical ? "x1" : "y1", thickness)
-	      	.attr(vertical ? "x2" : "y2", thickness / 7 * 6);
-	      
-	      tick.append("text")
-	      	.attr(vertical ? "dx" : "dy", 5)
-	      	.attr(vertical ? "x" : "y", thickness * 7 / 6)
-	      	.style("text-anchor", "middle")
-	      	.text(function(d, i){ return i; });
-      }
-	
-	function stateChange(data){
-		if(!data){
-			d3.select("#feedback").transition()
-				.duration(100)
-				.style("opacity", 0);
-			return;
-		} else {
-			d3.select("#feedback").transition()
-				.duration(100)
-				.style("opacity", 1);
-		}
-		
-		data.forEach(function(bullet){
-			// Adds the top value for the sentiment analisys to be consistent 
-			var topValue = 5;
-			bullet.ranges.push(topValue);
-			
-			// Import data and sort it to properly display each layer
-			// otherwise the biggest rect will cover the smallest in the DOM
-			var rangez = bullet.ranges.sort(d3.descending);
-			var measurez = bullet.measures.sort(d3.descending);
-			var markerz = bullet.markers.sort(d3.descending);
-			
-			// Update the range rects.
-			var range = svg.selectAll("rect.range");
-
-			range.data(rangez)
-				.enter().append("rect")
-				.attr("class", function(d, i) { return "range r" + i; })
-				.attr("height", vertical ? 0 : thickness)
-				.attr("width", vertical ? thickness : 0)
-				.attr("x", 0)
-				.attr("y", vertical ? length : 0);
-
-			range.data(rangez)
-				.transition()
-				.duration(duration)
-				.attr(vertical ? "height" : "width", function(d){return bar(d);})
-				.attr("y", vertical ? function(d){ return length - bar(d); } : 0);
-
-
-			// Update the measure rects.
-			var measure = svg.selectAll("rect.measure");
-
-			measure.data(measurez)
-				.enter().append("rect")
-				.attr("class", function(d, i){ return "measure m" + i; })
-				.attr("height", vertical ? 0 : thickness / 3)
-				.attr("width", vertical ? thickness / 3 : 0)
-				.attr("x", vertical ? thickness / 3 : 0)
-				.attr("y", vertical ? length : thickness / 3);
-
-			measure.data(measurez)
-				.transition()
-				.duration(duration)
-				.attr(vertical ? "height" : "width", function(d){ return bar(d); })
-				.attr("y", vertical ? function(d){ return length - bar(d); } : thickness / 3);
-
-			
-			// Update the marker lines.
-			var marker = svg.selectAll("line.marker");
-
-			marker.data(markerz)
-				.enter().append("line")
-				.attr("class", "marker")
-				.attr(vertical ? "x1" : "y1", thickness / 6)
-				.attr(vertical ? "x2" : "y2", thickness * 5 / 6);
-
-			marker.data(markerz)
-				.transition()
-				.duration(duration)
-				.attr(vertical ? "y1" : "x1", function(d){ return bar(d); })
-				.attr(vertical ? "y2" : "x2", function(d){ return bar(d); });
-
-			
-			title.transition()
-				.duration(duration)
-				.attr("opacity", 1);
-		});
-
-		if(plotTick){
-			// Transition the updating ticks to the new scale, x1.
-			var tickUpdate = tick.transition()
-				.duration(duration + 100)
-				.style("opacity", 1);
-		}
-	}
-	
-	dispatch.on("updateFeedback", stateChange);
-}
-
-function feedbackList(){
-	var feedlist = {
-		keys: []
-	};
-	
-	var numberFormat = d3.format(".2r");
-	var dateFormat = d3.time.format("%e / %m / %Y");
-	
-	var table = d3.select("#feedback-table");
-	
-	feedlist.keys = function(_keys)	{
-		if(arguments.length > 0){
-			feedlist.keys = _keys;
-			return feedlist;
-		}
-		
-		return feedlist.keys;
-	};
-	
-	feedlist.render = function(_data){
-//		var data = d3.entries(_data).filter(function(d){
-//					var f = ['region', 'hotel', 'count'];
-//					return f.every(function(k){
-//						return d.key !== k;
-//					});
-//				});
-
-		var data = _data.map(function(d){
-			return d3.entries(subObject(d, feedlist.keys));
-		});
-		console.log(data);
-		
-		// create the table header
-		var thead = table.select("thead").selectAll("th")
-			.data(feedlist.keys)
-			.enter().append("th").append("span")
-				.text(function(d){ return d.capitalize(); });
-		
-		var feeds = table.select("tbody").selectAll("tr").data(data);
-		
-		// create rows
-		var tr = feeds.enter().append("tr");
-		 
-		// cells
-		var td = tr.selectAll("td")
-			.data(function(d, i){ return d;})
-			.enter().append("td")
-			.text(function(d) {
-				if(d.value == undefined) return "Unavailable";
-				if(isFinite(d.value)) return numberFormat(+d.value);
-				if(d.key === "date") return dateFormat(d.value);
-				return d.value; });
-	
-		feeds.exit().remove();
-		
-		return feedlist;
-	};
-	
-	return feedlist;
-}
-
-function subObject(obj, keys){
-	var res = {};
-	keys.forEach(function(key){
-		res[key] = obj[key];
-	});
-	return res;
-}
-
-/**
  * ------- updateDetails --------
  * Updates static information (not driven by d3) of the detail
  * section in order to be aligned to d3's data displayed
@@ -1465,8 +814,6 @@ $(document).ready(function(){
 	dispatch.on("load.map", mapBuild);
 	dispatch.on("load.coffee.fun", coffeeCompBuild);
 	dispatch.on("load.coffee.consume", coffeeConsumeBuild);
-	dispatch.on("load.turist", turistNationalityBuild);
-	dispatch.on("load.sentiment", sentimentBuild);
 	dispatch.on("regionChange.details", updateDetails);
 	
 	// Loading all data TODO: aggiungere progress bar?

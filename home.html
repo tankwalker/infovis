@@ -11,10 +11,13 @@
 <script src="http://d3js.org/topojson.v1.min.js"></script>
 <script src="http://d3js.org/queue.v1.min.js"></script>
 <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
-<script src="js/crossfilter.min.js"></script>
+<!-- <script src="js/crossfilter.min.js"></script> -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.1/crossfilter.js"></script>
 <script src="js/sankey.js"></script>
-<script src="js/interactive.js"></script>
+<script src="js/interactive3.js"></script>
 <script src="js/bullet.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/feedback.js"></script>
 
 <title>Information Visualization Project</title>
 </head>
@@ -55,24 +58,30 @@
 		
 		<div id="hotels">
 			<img class="ball inline" src="images/info.png" style="padding: 5px">
-			<h3 class="inline">Numero delle strutture presenti</h3>
-			<div id="hotels-number" class="inline">12</div>
+			<h3 class="inline">Numero delle strutture presenti:</h3>
+			<div id="hotels-number" class="inline">NA</div>
 		</div>
 		
 		<!-- Rappresentazione della sentiment analysis con foucs sulla struttura selezionata -->
-		<div id="sentiment">
-			<h3 style="display: inline-block">Feedback</h3>
-			<h3 id="hotel-name" style="display: inline-block"></h3>
+		<div id="sentiment" style="opacity: 0; display: none;">
+			<h2 id="hotel-name">Hotel name</h2>
+			
+			<h3>Sentiment Analysis</h3>
 			<div id="feedback"></div>
 			<div id="rank"></div>
 			
-			<table id="feedback-table" class="table table-hover">
-				<thead class="header">
-				</thead>
-				<tbody>
-				</tbody>
-			</table>
-			
+			<h3 style="display: inline-block">Feedback list</h3>
+			<div id="button-showflist" style="display: inline-block">Show/hide feedback list</div>
+			<div id="table-wrapper">
+				<div id="table-scroll">
+					<table id="feedback-table" class="table table-hover">
+						<thead>
+						</thead>
+						<tbody>
+						</tbody>
+					</table>
+				</div>
+			</div>
 		</div>
 		
 		<!-- Contenitore della mappa geografica interattiva -->

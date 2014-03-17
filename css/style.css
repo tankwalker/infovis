@@ -60,7 +60,7 @@ h2 {
 }
 
 h3 {
-	
+	font-weight: 300;
 }
 
 /* Classes */
@@ -89,6 +89,7 @@ h3 {
 
 .inline {
 	display: inline-block;
+	margin-left: 5px;
 }
 
 .entry {
@@ -103,6 +104,10 @@ h3 {
 
 .entry:hover {
     background-color: rgba(255, 255, 255, .4);
+}
+
+.entry.active {
+    background-color: rgba(250, 120, 46, .4);
 }
 
 .section {
@@ -142,9 +147,11 @@ h3 {
 
 #hotels {
 	min-width: 400px;
+	max-heigth: 300px;
 	position: absolute;
 	top: 50px;
 	right: 10px;
+	overflow: auto;
 }
 
 #map {
@@ -162,12 +169,28 @@ h3 {
 	background: rgba(0, 0, 0, .3);
 }
 
-/* TABLES */
+/*** Feedback table ***/
+#table-wrapper {
+  position: relative;
+  width: 50%;
+}
+
+#table-scroll {
+  height: 300px;
+  overflow: auto;  
+  margin-top: 20px;
+}
+
+#table-wrapper table thead th > span {
+  position: absolute;   
+  top: -20px;
+}
+
 table {
   max-width: 100%;
   background-color: transparent;
 }
-th {
+th, th > span {
   text-align: left;
   font-weight: bold;
 }

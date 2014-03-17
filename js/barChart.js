@@ -1,18 +1,18 @@
-(function barChart(){
-	this.width = 200,
-	this.height = 200;
+function barChart(){
+	var width = 200,
+		height = 200;
 
-	this.name = "bar";
-	this.thickness = 20;				// height of a single bar
-	this.labelWidth = 50;				// width of the label
-	this.margin = {left:10, top:0, right:70, bottom:0};
+		name = "bar";
+		thickness = 20;				// height of a single bar
+		labelWidth = 50;				// width of the label
+		margin = {left:10, top:0, right:70, bottom:0};
 
-	this.color = d3.scale.ordinal();
-	this.pos = d3.scale.ordinal();
-	this.bar = d3.scale.linear();
-	this.svg = d3.select("#"+name).append("svg");
+		color = d3.scale.ordinal();
+		pos = d3.scale.ordinal();
+		bar = d3.scale.linear();
+		svg = d3.select("#"+name).append("svg");
 
-	this.pack = null;
+		pack = null;
 
 	barChart.prototype.data = function(data){
 		if(!arguments.lenght)
@@ -36,7 +36,7 @@
 		return this;
 	};
 
-	barChart.prototype.draw = function (){
+	function chart(){
 		svg.selectAll(".bar").data(pack.keys)
 		.enter().append("rect")
 		.attr("class", "bar")
@@ -125,4 +125,4 @@
 	};
 
 	return this;
-})();
+}
