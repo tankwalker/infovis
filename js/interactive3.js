@@ -3,7 +3,7 @@ var coffeeCompUrl = "csv/coffees.csv",
 	turistCompUrl = "csv/turist.csv",
 	mapUrl = "json/ita2.json",
 	rankingUrl = "csv/ranking.csv",
-	sentimentUrl = "csv/sentiment2.csv";
+	sentimentUrl = "csv/sentiment3.csv";
 
 var regionSelected = {};
 
@@ -478,7 +478,7 @@ function mapBuild(){
 }
 
 /**
- * Builds the donuts graph which represents the composition of coffee
+ * Builds the chart which represents the composition of coffee
  * consumption in the selected region
  */
 function coffeeCompBuild(){
@@ -489,120 +489,37 @@ function coffeeCompBuild(){
 	var labelWidth = 60;		// width of the label
 	var margin = {left:10, top:0, right:70, bottom:0};
 	
-	var pack = packInfo(coffeeFan, ["region"]); // TODO: come è fatto l'oggetto?
-
-	var color = d3.scale.linear() //TODO: colori!
-		//.range(["#ffcc00", "#cc9900", "#664c00", "#523d00", "#cc6600", "#8f4700", "#4c3300"])
+	var xcoffee = crossfilter(coffeeFan);
+	var coffeeByRegion = xcoffee.dimension(function(d){ return d.region; });
+	
+	var color = d3.scale.linear()
 		.range(["#ffcc00", "#4c3300"])
-		.domain([0, pack.keys.length]);
+		.domain([0, 10]);
 
 	var pos = d3.scale.ordinal()
-		.domain([0, pack.keys.length]);
+		.domain([0, 10]);
 	
 	var bar = d3.scale.linear()
-		.domain([0, pack.top]);
+		.domain([0, 1000]);
 	
-	var svg = d3.select("#fan-chart").append("svg");
+	var kgFormat = function(d){ return d + " Kg"; };
 	
+	var chart = barChart("fan-chart")
+		.bar(bar)
+		.pos(pos)
+		.color(color)
+		.formatText(kgFormat);
 	
-	function setBoundaries(w, h){
-		width = w * detailDim.ratio;
-
-		pos.rangeRoundBands([0, height], .5, .7);
-		bar.range([0, width - labelWidth - margin.left - margin.right]);
-		
-		svg.attr("width", width)
-			.attr("height", height)
-			.attr("transform", "translate(" + margin.left + "," + margin.top  + ")");
-	}
-	
-	function draw(){
-		svg.selectAll(".bar").data(pack.keys)
-			.enter().append("rect")
-				.attr("class", "bar")
-				.attr("x", labelWidth)
-				.attr("y", function(d, i){ return i * pos.rangeBand(); })
-				.attr("width", 0)
-				.attr("height", thickness)
-				.style("fill", function(d){	return color(d); });
-		
-		
-		svg.selectAll(".label").data(pack.keys)
-			.enter().append("text")
-				.attr("class", "label")
-				.attr("x", 0)
-				.attr("y", function(d, i){ return i * pos.rangeBand(); })
-				.attr("dy", 15)
-				.style("fill", "#777")
-				.style("font-weight", "bold")
-				.text(function(d){ return d; });
-		
-		svg.selectAll(".textbar").data(pack.keys)
-			.enter().append("text")
-				.attr("class", "textbar")
-				.attr("x", 0)
-				.attr("y", function(d, i){ return i * pos.rangeBand(); })
-				.attr("dy", 15)
-				.style("fill", "#fff")
-				.style("opacity", 0)
-				.style("font-weight", "bold");
-	};
-	
-	/**
-	 * Updates data
-	 * @returns
-	 */
 	function stateChange(region){
-//		var region = regionSelected.name;
-		var data = pack.extract(region);
-		
-		var rect = svg.selectAll(".bar");
-		var label = svg.selectAll(".label");
-		var text = svg.selectAll(".textbar");
-
-		if(!data){
-			rect.transition()
-				.duration(duration)
-				.attr("width", 0);
-			
-//			label.transition()
-//				.duration(duration)
-//				.style("opacity", 0);
-
-			text.transition()
-				.duration(duration)
-				.attr("x", 0)
-				.style("opacity", 0);
-			
-			error = new Error("No region data for '" + region + "'");
-			console.warn(error);
-			return error;
-		}
-		
-		rect.transition()
-			.duration(duration)
-			.attr("width", function(d){ return bar(data[d]); });
-			
-//		label.style("opacity", 1);
-		
-		text.transition()
-			.duration(duration)
-			.text(function(d){ return data[d] + " Kg"; })
-			.attr("x", function(d){ return bar(data[d]) + labelWidth + 10; })
-			.style("text-align", "center")
-			.style("opacity", 1);
-	};
-		
-	function resize(w, h){
-		setBoundaries(w, height);
-		stateChange();
-	};
-	
-	setBoundaries(window.w, window.h);
-	draw();
-	
+		var data = d3.entries(coffeeByRegion.filter(region).top(1)[0]).filter(function(d){ return d.key !== "region"; });
+		chart.data(data)
+			.render();
+	}
+//	
 	dispatch.on("regionChange.coffee.fan", stateChange);
-	dispatch.on("resize.coffee.fan", resize);
+//	dispatch.on("resize.coffee.fan", resize);
+	
+	return chart;
 };
 
 ;
@@ -617,157 +534,39 @@ function coffeeConsumeBuild(){
 	var labelWidth = 10;
 	var margin = {left:10, top:0, right:70, bottom:0};
 	
-	// Loads data
-	var pack = packInfo(coffeeConsume, ["region"]);
-	pack.toStack();
-
-	var bar = d3.scale.linear();
+	var xcoffee = crossfilter(coffeeConsume);
+	var coffeeByRegion = xcoffee.dimension(function(d){ return d.region; });
+	
+	var bar = d3.scale.linear()
+		.domain([0, 1000]);
 	
 	var pos = d3.scale.ordinal()
-		.domain([0, pack.keys.length]);
+		.domain([0, 10]);
 	
 	var color = d3.scale.linear()
-		//.range(["#4c2511", "#8f4700", "#cc6600"])
 		.range(["#4c2511", "#cc6600"])
-		.domain([0, pack.keys.length]);
+		.domain([0, 10]);
 
 	var percentage = d3.format(".1%");
-	
-	var svg = d3.select("#consume-chart").append("svg")
-		.attr("width", width)
-		.attr("height", height)
-		.attr("transform", "translate(5, 10)");
 
-	function setBoundaries(w, h){
-		width = w * detailDim.ratio;
-		
-		pos.rangeRoundBands([0, height], .5, .7);
-		bar.range([0, width - margin.left - margin.right]);
-		
-		svg.attr("width", width)
-			.attr("height", height)
-			.attr("transform", "translate(" + margin.left + "," + margin.top  + ")");
-	};
+	var chart = barChart("consume-chart")
+		.bar(bar)
+		.pos(pos)
+		.color(color)
+		.formatText(percentage);
 	
-	function draw(){
- 		/*svg.selectAll(".bar").data(pack.keys)
-			.enter().append("rect")
-			.attr("class", "bar")
-			.attr("x", 0)
-			.attr("y", 25)
-			.attr("width", 0)
-			.attr("height", barThickness)
-			.style("fill", function(d, i){ return color(i); });*/
- 		
- 		svg.selectAll(".bar").data(pack.keys)
-			.enter().append("rect")
-			.attr("class", "bar")
-			.attr("x", 0)
-			.attr("y", 0)
-			.attr("width", 0)
-			.attr("height", barThickness)
-			.style("fill", function(d, i){ return color(i); });
-
-		svg.selectAll(".label").data(pack.keys)
-			.enter().append("text")
-			.attr("class", "label")
-			.attr("x", 0)
-			.attr("y", 0)
-			.attr("dy", 15)
-			.style("fill", "#777")
-			.style("font-weight", "bold")
-			.style("opacity", 0)
-			.text(function(d){ return d.capitalize(); });
-		
-		svg.selectAll(".textbar").data(pack.keys)
-			.enter().append("text")
-				.attr("class", "textbar")
-				.attr("x", 0)
-				.attr("y", 40)
-				.style("font-weight", "bold")
-				.style("fill", "#fff");
-		
-		svg.selectAll(".chord").data(pack.keys)
-			.enter().append("path")
-				.attr("class", "chord");
-	};
-		
-	// Updates data
 	function stateChange(region){
-		var data = pack.extract(region);
-		
-		var rect = svg.selectAll(".bar");
-		var label = svg.selectAll(".label");
-		var text = svg.selectAll(".textbar");
-		
-		if(!data){
-			rect.transition()
-				.duration(duration)
-				.attr("x", 0)
-				.attr("width", 0);
-			
-			label.transition()
-				.duration(duration)
-				.attr("x", 0)
-				.style("opacity", 0);
-			
-			text.transition()
-				.duration(duration)
-				.attr("x", 0)
-				.style("opacity", 0);
-			
-			error = new Error("No region data for '" + region + "'");
-			console.warn(error);
-			return error;
-		}
-		
-		bar.domain([0, data.total]);
-		
-		rect.data(data.stack).transition()
-			.duration(duration)
-			.attr("x", function(d){ return bar(d.y0); })
-			.attr("width", function(d){ return (bar(d.y) - bar(d.y0)); });
-		
-		label.data(data.stack).transition()
-			.duration(duration)
-			.attr("x", function(d){ return bar(d.y0) + labelWidth; })
-			.style("opacity", 1);
-		
-		text.data(data.stack).transition()
-			.duration(duration)
-			.attr("x", function(d){ return bar(d.y0) + labelWidth; })
-			.style("opacity", 1)
-			.text(function(d){ return percentage(((d.y) - (d.y0)) / data.total); });
-	};
-		
-	function resize(w, h){
-		setBoundaries(w, height);
-		stateChange();
-	};
-	
-	setBoundaries(window.w, window.h);
-	draw();
+		var data = d3.entries(coffeeByRegion.filter(region).top(1)[0]).filter(function(d){ return d.key !== "region"; });
+		chart.data(data)
+			.render();
+	}
 	
 	dispatch.on("regionChange.coffee.consume", stateChange);
-	dispatch.on("resize.coffee.consume", resize);
+//	dispatch.on("resize.coffee.consume", resize);
+	
+	return chart;
 };
 
-function buildChord(data){
-	p = [];
-	
-	data.forEach(function(e, i){
-		var obj = {};
-		
-		obj.x = bar(data.y) - bar(data.y0);
-		obj.y = i * pos.rangeBand() + barHeight;
-		
-		p.push(obj);
-	});
-
-	return "M" + p[0].x + "," + p[0].y + "L" + p[1].x + "," + p[1].y +
-		"q" + p[2].x + "," + p[2].y + " " + "10,5" + "L" + p[3].x + "," + p[3].y +
-		"q" + p[3].x + "," + p[3].y + "-10, -5";
-}
 
 /**
  * ------- updateDetails --------
@@ -807,10 +606,10 @@ function onResize(){
  */
 $(document).ready(function(){
 	// Declering dispatch possible events
-	dispatch = d3.dispatch("load", "regionChange", "updateFeedback","resize");
+	dispatch = d3.dispatch("load", "regionChange", "updateFeedback","resize");	//TODO: da rivedere quali eventi lasciare
 
 	// Registering events
-//	$(window).resize(onResize);
+//	$(window).resize(onResize);		//TODO: da implementare
 	dispatch.on("load.map", mapBuild);
 	dispatch.on("load.coffee.fun", coffeeCompBuild);
 	dispatch.on("load.coffee.consume", coffeeConsumeBuild);
@@ -830,14 +629,11 @@ $(document).ready(function(){
 				return error;
 			}
 			
-//			feedbacksInit(_sentiment);
 			feedback = feedback(_sentiment);
 			
 			// Binding data
 			coffeeConsume = _coffeeConsume;
 			coffeeFan = _coffeeFan;
-			turist = _turist;
-			sentiment = _sentiment;
 			ita = _ita;
 			ranking = _ranking;
 			

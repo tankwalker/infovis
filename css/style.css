@@ -5,11 +5,30 @@
 	fill:none;
 }
 
-path {
-	fill: gray;
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #fff;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+	
+}
+
+.axis text {
+	fill: none;
+	stroke: #909090;
+}
+
+.line {
+  fill: none;
+  stroke: white;
+  stroke-width: 1.5px;
 }
 
 .region {
+	fill: gray;
 	stroke: black;
 	stroke-width: 0.5;
 }
@@ -152,6 +171,8 @@ h3 {
 	top: 50px;
 	right: 10px;
 	overflow: auto;
+	position: fixed;
+	top: 200px;
 }
 
 #map {
@@ -217,4 +238,10 @@ th, th > span {
 .table-hover > tbody > tr:hover > td,
 .table-hover > tbody > tr:hover > th {
   background-color: #555;
+}
+
+
+/**** Trend analysis ****/
+#trend-analysis {
+	color: white;
 }

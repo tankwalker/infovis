@@ -19,6 +19,19 @@
 <script src="js/charts.js"></script>
 <script src="js/feedback.js"></script>
 
+<script type="text/javascript">
+<!--
+var feedList = true
+function showFeedList(){
+	feedList = !feedList;
+	var table = $("#table-wrapper");
+	var label = $("#button-showflist > span");
+	feedList ? label.text( "Hide feedback list") : label.text( "Show feedback list");
+	feedList ? table.show() : table.hide();
+}
+//-->
+</script>
+
 <title>Information Visualization Project</title>
 </head>
 
@@ -71,16 +84,20 @@
 			<div id="rank"></div>
 			
 			<h3 style="display: inline-block">Feedback list</h3>
-			<div id="button-showflist" style="display: inline-block">Show/hide feedback list</div>
-			<div id="table-wrapper">
-				<div id="table-scroll">
-					<table id="feedback-table" class="table table-hover">
-						<thead>
-						</thead>
-						<tbody>
-						</tbody>
-					</table>
+			<div id="button-showflist" style="display: inline-block"><span onclick="showFeedList" style="cursor: pointer;">Hide feedback list</span></div>
+			<div>
+				<div id="table-wrapper" class="inline">
+					<div id="table-scroll">
+						<table id="feedback-table" class="table table-hover">
+							<thead>
+							</thead>
+							<tbody>
+							</tbody>
+						</table>
+					</div>
 				</div>
+				
+				<div id="trend-analysis" class="inline"></div>
 			</div>
 		</div>
 		

@@ -46,7 +46,7 @@ function feedbackList(){
 			.text(function(d) {
 				if(d.value == undefined) return "Unavailable";
 				if(isFinite(d.value)) return numberFormat(+d.value);
-				if(d.key === "date") return dateFormat(d.value);
+				if(d.key === "date") return d.value;
 				return d.value; });
 	
 		feeds.exit().remove();
@@ -89,7 +89,7 @@ function hotelList(){
 	var countDiv = d3.select("#hotels-number");
 	
 	function clicked(name, div){
-		if(selected === name){
+		if(selected === name || name === null){
 			selected = null;
 			d3.selectAll(".entry").classed("active", false);
 			return;
@@ -192,6 +192,11 @@ function hotelList(){
 		return list;
 	};
 	
+	list.clearSelection = function(){
+		selected = false;
+		return list;
+	};
+	
 	return list;
 }
 
@@ -215,7 +220,8 @@ function feedback(data){
 		
 	var turistDiv = "turist-chart",
 		sentimentDiv = "feedback",
-		feedListDiv = "feedback-table";
+		feedListDiv = "feedback-table",
+		trendDiv = "trend-analysis";
 	
 	var hotels = hotelList()
 		.update(hotelChange);
@@ -226,16 +232,31 @@ function feedback(data){
 			.domain([0, 10]))
 		.color(d3.scale.linear()
 			.range(["#6685e0", "#001a4c"])
-			.domain([0, 10]));
+			.domain([0, 10]))
+		.formatText(d3.format("Kg"));
 	var sentiment = bulletChart(sentimentDiv);
 	var feedList = feedbackList(feedListDiv).keys(tableHeaders);
+	var trend = lineChart(trendDiv)
+		.x(function(d){ return d.key; })
+		.y(function(d){ return d.value.rank; });
+	
+	var formatDate = d3.time.format("%Y-%m-%d %H:%M:%S");
+	
+	// Parses records to cast fields
+	data.forEach(function(d){
+		d.date = formatDate.parse(d.date);
+		keys.forEach(function(k){
+			d[k] = +d[k];
+		});
+	});
 	
 	// Create crossfilter and dimensions to filter feedbacks
-	var feedback = crossfilter(data),
+	 feedback = crossfilter(data),
 		feedbackByRegion = feedback.dimension(function(d){ return d.region; }),
 		feedbackByHotel = feedback.dimension(function(d){ return d.hotel; }),
 		feedbackByHotelFilter = feedback.dimension(function(d){ return d.hotel; }),
 		feedbackByCountry = feedback.dimension(function(d){ return d.country; }),
+		feedbackByDate = feedback.dimension(function(d){ return d.date; }),
 		feedbackByKey = {
 			group:function(){
 				var res = [];
@@ -258,12 +279,14 @@ function feedback(data){
 		groupAllHotelFiltered = feedbackByHotelFilter.groupAll();
 		groupAllHotel = feedbackByHotel.groupAll(),
 		groupByRegion = feedbackByRegion.group(),
-		groupAllRegion = feedbackByRegion.groupAll();
+		groupAllRegion = feedbackByRegion.groupAll(),
+		groupByDate = feedbackByDate.group(d3.time.day);
 		
-	groupAllHotel.reduce(reduceBulletAdd, null, reduceBulletInit),
-	groupAllHotelFiltered.reduce(reduceBulletAdd, null, reduceBulletInit),
-	groupByHotel.reduce(reduceToRankAdd, reduceToRankRemove, reduceToRankInit).order(function(p){ return p.rank; }),
+	groupAllHotel.reduce(reduceBulletAdd, null, reduceBulletInit);
+	groupAllHotelFiltered.reduce(reduceBulletAdd, null, reduceBulletInit);
+	groupByHotel.reduce(reduceToRankAdd, reduceToRankRemove, reduceToRankInit).order(function(p){ return p.rank; });
 	groupByCountry.reduceCount();
+	groupByDate.reduce(reduceToRankAdd, reduceToRankRemove, reduceToRankInit).order(function(p){ return p.key; });
 	
 	/* ---- reduce functions ----*/
 	function reduceToRankAdd(p, v){
@@ -278,7 +301,12 @@ function feedback(data){
 	function reduceToRankRemove(p, v){
 		keys.forEach(function(key){
 			var a = +v[key];
-			p.rank = ((p.count * p.rank) - a) / --p.count;
+			p.count--;
+			if(!p.count){
+				p.rank = 0;
+				return p;
+			}
+			p.rank = ((p.count * p.rank) - a) / p.count;
 		});
 		
 		return p;
@@ -427,6 +455,10 @@ function feedback(data){
 		feedList
 			.data(feedbacks())
 			.render();
+		
+		trend
+			.data(groupByDate.all().filter(function(d){ return d.value.count != 0; }))
+			.render();
 		return fb;
 	};
 	
@@ -453,6 +485,7 @@ function feedback(data){
 				div.style("display", _bool ? "block" : "none");
 		});
 		
+		hotels.clearSelection();
 		hotels.show(_bool);
 		return fb;
 	};
