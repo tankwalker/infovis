@@ -34,240 +34,6 @@ var barThickness = 20;			// Thickness of the bars in each bar chart
 var dispatch;					// Dispatcher of events
 
 /**
- * Packs the csv file into a structured object, featuring some utility functions 
- * @param data
- * @returns {___pack0}
- */
-function packInfo(data, filters){
-	var pack = new Object();
-
-	// Loads data
-	pack.keys = d3.keys(data[0]).filter(function(obj){
-		var res = true;
-		filters.forEach(function(f){res &= obj !== f;});
-		return res;
-	});
-	
-	pack.objects = [];
-	pack.top = 0;
-	data.forEach(function(obj){
-		var object = {region:obj.region, total:0, max:0};
-		
-		pack.keys.map(function(key){
-			object[key] = +obj[key];
-			object.total += object[key];
-			if(object.max < object[key])
-				object.max = object[key];
-		});
-		
-		pack.objects.push(object);
-		
-		if(pack.top < object.max)
-			pack.top = object.max;
-	});
-
-	/*
-	 * Structures data to be used in a stacked bar chart
-	 */
-	pack.toStack = function(){
-		pack.objects.forEach(function(obj){
-			var y0 = 0;
-	
-			obj.stack = pack.keys.map(function(key){
-				return {name:key, y0:y0, y:y0 += +obj[key]};
-			});
-		});
-		
-		return pack;
-	};
-	
-	/*
-	 * Allows to extract only the relevant information for the selected region
-	 */
-	pack.extract = function(region){
-		return pack.objects.filter(function(obj){
-			return obj.region === region;
-		}).pop();
-	};
-	
-	return pack;
-}
-
-function packSentiment(data, filters){
-	var pack = {
-			name : "sentiment",
-			objects : {}
-	};
-	
-	// Loads data
-	pack.keys = d3.keys(data[0]).filter(function(obj){
-		var res = true;
-		filters.forEach(function(f){res &= obj !== f;});
-		return res;
-	});
-	
-	// For each object in the csv
-	// (which is a simple feedback entry comprising the inline indication of region and hotel)
-	data.forEach(function(obj){
-		var feedback = {};
-		
-		var region,
-			hotel;
-		
-		// Extract only the feedback's keys packing them into a 'feedback' object
-		pack.keys.forEach(function(key){
-			feedback[key] = +obj[key];
-		});
-		
-		/* Adds the feedback object to the correct region and hotel entry */
-		region = obj.region;
-		hotel = obj.hotel;
-		if(!pack.objects[region])
-			pack.objects[region] = {};
-		
-		if(!pack.objects[region][hotel])
-			pack.objects[region][hotel] = [];
-		
-		pack.objects[region][hotel].push(feedback);
-	});
-	
-	pack.bullet = function(region, hotel){
-		var tregion = pack.objects[region]; 		// Assumed that 'target' exists!
-		var thotel;
-		
-		if(tregion[hotel].bullets)
-			return tregion[hotel].bullets;
-		
-		var hotels = d3.keys(tregion);
-		
-		// For each hotel listed in the region, compute its bullets
-		hotels.forEach(function(h){
-			var top = 5;
-			var mean = {};
-			tregion.mean = mean;
-			thotel = tregion[h];
-		
-			// For each key, create a new object representing a bullet bar
-			var bullets = pack.keys.map(function(key){
-				var min = -1,
-					max = -1;
-				
-				mean[key] = 0;	// initialize totals objects that is required later to calculate region's mean
-				
-				// then iterate on each feedback entry for each of the interesting key (a bit wasteful, i know...)
-				thotel.forEach(function(feedback){
-					if(!isFinite(feedback[key]))
-						return null;
-					
-					// Min
-					if(min > feedback[key] || min < 0)
-						min = feedback[key];
-	
-					// Max
-					if(max < feedback[key])
-						max = feedback[key];
-					
-					// Mean
-					mean[key] += feedback[key];
-				});
-				
-				// Finalize mean
-				mean[key] /= thotel.length;
-				
-				// Returns the 'bullet' object
-				return {
-					title:key,
-					measures:[mean[key]],
-					ranges:[min, max, top],
-					markers:[]			// Needs all hotel's bullets to be computed, to calculate overall mean value
-				};
-			});
-			
-			// Add bullet object to the current hotel
-			thotel.bullets = bullets;
-		});
-		
-		/*
-		 * Now, since each hotel's bullets are computed, it is possible
-		 * to calculate the overall region's mean values from the 'measures'
-		 * of each single hotel by dividing 'mean'by each of the key 
-		 * which represent a bullet (again, should be optimized!)
-		 */ 
-		pack.keys.forEach(function(key){
-			tregion.mean[key] /= hotels.length;
-		});
-		
-		// Now, update each hotel 'markers' element inside bullet object
-		hotels.forEach(function(h){
-			thotel = tregion[h];
-			pack.keys.forEach(function(key, index){
-				thotel.bullets[index].markers.push(tregion.mean[key]);
-			});
-		});
-		
-		return tregion[hotel].bullets;
-	};
-	
-	pack.ranges = function(region, hotel){
-		if(!pack.objects[region][hotel].bullet)
-			pack.objects[region][hotel].bullet = {};
-		
-		pack.objects[region][hotel].bullet.ranges = pack.keys.map(function(key){
-			var bullet = {title:key};
-			var min = -1, max = -1;
-			
-			pack.objects[region][hotel].forEach(function(feedback){
-				console.log(feedback[key]);
-					if(min > feedback[key] || min < 0)
-						min = feedback[key];
-
-					if(max < feedback[key])
-						max = feedback[key];
-			});
-			
-			bullet.ranges = [min, max];
-			return bullet;
-		});
-		
-		return pack.objects[region][hotel].bullet.ranges;
-	};
-	
-	pack.measures = function(region, hotel){
-		var mean = 0;
-		var count = 0;
-		var bullet = {};
-		
-		if(!pack.objects[region][hotel].bullet)
-			pack.objects[region][hotel].bullet = {};
-		
-		pack.objects[region][hotel].bullet.measures = pack.keys.map(function(key){
-			mean = 0;
-			count = 0;
-			
-			pack.objects[region][hotel].forEach(function(feedback){
-				pack.keys.forEach(function(key){
-					mean += feedback[key];
-					count++;
-				});
-			});
-			
-			bullet.measures = [mean/count];
-		});
-		
-		
-		pack.objects[region][hotel].bullet.measures.forEach(function(obj){
-			pack.keys.forEach(function(key){
-				obj[key] /= count;
-			});
-		});
-		
-		return pack.objects[region][hotel].bullet.measures;
-	};
-	
-	return pack;
-}
-
-/**
  * Capitalize the first character of a string
  * @returns String
  */
@@ -329,10 +95,10 @@ function mapBuild(){
 //			.attr("class", "region-border")
 //			.attr("d", path);
 	
-	circles = gcircles.selectAll(".ranking")
-		.data(ranking)
-		.enter().append("circle")
-			.attr("class", "ranking");
+//	circles = gcircles.selectAll(".ranking")
+//		.data(ranking)
+//		.enter().append("circle")
+//			.attr("class", "ranking");
 	
 	function drawMap(){
 		sub.selectAll(".region")
@@ -450,7 +216,7 @@ function mapBuild(){
 			// List all the hotel for the selected region
 			feedback.filterRegion(regionSelected.name)
 				.filterHotel(null)
-				.renderTurist();
+				.renderAll();
 			
 			// Dispatch the stateChane event to update all the charts
 			dispatch.regionChange(regionSelected.name);
@@ -515,7 +281,11 @@ function coffeeCompBuild(){
 		chart.data(data)
 			.render();
 	}
-//	
+	
+	function resize(w, h){
+		chart.render();
+	}
+
 	dispatch.on("regionChange.coffee.fan", stateChange);
 //	dispatch.on("resize.coffee.fan", resize);
 	
@@ -560,23 +330,16 @@ function coffeeConsumeBuild(){
 		chart.data(data)
 			.render();
 	}
+
+	function resize(w, h){
+		chart.render();
+	}
 	
 	dispatch.on("regionChange.coffee.consume", stateChange);
 //	dispatch.on("resize.coffee.consume", resize);
 	
 	return chart;
 };
-
-
-/**
- * ------- updateDetails --------
- * Updates static information (not driven by d3) of the detail
- * section in order to be aligned to d3's data displayed
- */
-function updateDetails(){
-	var title = d3.select("#name")
-		.text(regionSelected.name);
-}
 
 
 /**
@@ -609,11 +372,10 @@ $(document).ready(function(){
 	dispatch = d3.dispatch("load", "regionChange", "updateFeedback","resize");	//TODO: da rivedere quali eventi lasciare
 
 	// Registering events
-//	$(window).resize(onResize);		//TODO: da implementare
+	$(window).resize(onResize);		//TODO: da implementare
 	dispatch.on("load.map", mapBuild);
 	dispatch.on("load.coffee.fun", coffeeCompBuild);
 	dispatch.on("load.coffee.consume", coffeeConsumeBuild);
-	dispatch.on("regionChange.details", updateDetails);
 	
 	// Loading all data TODO: aggiungere progress bar?
 	queue()

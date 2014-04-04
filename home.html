@@ -13,21 +13,24 @@
 <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
 <!-- <script src="js/crossfilter.min.js"></script> -->
 <script src="//cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.1/crossfilter.js"></script>
-<script src="js/sankey.js"></script>
+<!-- <script src="js/sankey.js"></script> -->
 <script src="js/interactive3.js"></script>
 <script src="js/bullet.js"></script>
 <script src="js/charts.js"></script>
 <script src="js/feedback.js"></script>
+<script src="js/jquery.sticky.js"></script>
 
 <script type="text/javascript">
 <!--
 var feedList = true
-function showFeedList(){
+function toggleFeedList(){
 	feedList = !feedList;
 	var table = $("#table-wrapper");
 	var label = $("#button-showflist > span");
+	var opt = {duration:500, easing:"swing"};
+
 	feedList ? label.text( "Hide feedback list") : label.text( "Show feedback list");
-	feedList ? table.show() : table.hide();
+	table.slideToggle(opt);
 }
 //-->
 </script>
@@ -77,15 +80,26 @@ function showFeedList(){
 		
 		<!-- Rappresentazione della sentiment analysis con foucs sulla struttura selezionata -->
 		<div id="sentiment" style="opacity: 0; display: none;">
-			<h2 id="hotel-name">Hotel name</h2>
+			<h2>Statistiche: <span id="hotel-name">Generali</span></h2>
 			
-			<h3>Sentiment Analysis</h3>
-			<div id="feedback"></div>
-			<div id="rank"></div>
+			<div class="inline">
+				<h3>Sentiment Analysis</h3>
+				<div id="feedback"></div>
+			</div>
 			
-			<h3 style="display: inline-block">Feedback list</h3>
-			<div id="button-showflist" style="display: inline-block"><span onclick="showFeedList" style="cursor: pointer;">Hide feedback list</span></div>
+			<div id="rank-wrapper" class="inline">
+				<p>Valutazione globale</p>
+				<div id="rank"></div>
+			</div>
+			
 			<div>
+				<h3 class="inline">Feedback trend</h3>
+				<div id="button-showflist" class="inline"><span onclick="toggleFeedList()" style="cursor: pointer; margin-left:50px">Hide feedback list</span></div>
+			</div>
+			
+			<div>
+			
+				<!-- Tabella dei feedback -->
 				<div id="table-wrapper" class="inline">
 					<div id="table-scroll">
 						<table id="feedback-table" class="table table-hover">
@@ -97,7 +111,9 @@ function showFeedList(){
 					</div>
 				</div>
 				
+				<!-- Grafico dell'andamento delle valutazioni -->
 				<div id="trend-analysis" class="inline"></div>
+				
 			</div>
 		</div>
 		

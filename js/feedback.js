@@ -12,7 +12,7 @@ function feedbackList(){
 	var feedlist = {};
 	
 	var numberFormat = d3.format(".2r"),
-		dateFormat = d3.time.format("%e / %m / %Y");
+		dateFormat = d3.time.format("%e %b %Y");
 	
 	var data = [],
 		keys = [];
@@ -44,9 +44,9 @@ function feedbackList(){
 			.data(function(d, i){ return d;})
 			.enter().append("td")
 			.text(function(d) {
+				if(d.key === "date") return dateFormat(d.value);
 				if(d.value == undefined) return "Unavailable";
-				if(isFinite(d.value)) return numberFormat(+d.value);
-				if(d.key === "date") return d.value;
+				if(!isNaN(d.value)) return numberFormat(+d.value);
 				return d.value; });
 	
 		feeds.exit().remove();
@@ -87,8 +87,11 @@ function hotelList(){
 	
 	var svg = d3.select("#hotels").append("div");
 	var countDiv = d3.select("#hotels-number");
+	var hotelNameDiv = d3.select("#hotel-name");
 	
-	function clicked(name, div){
+	function clicked(hotel, div){
+		var name = hotel.name;
+
 		if(selected === name || name === null){
 			selected = null;
 			d3.selectAll(".entry").classed("active", false);
@@ -97,7 +100,7 @@ function hotelList(){
 		
 		selected = name;
 		d3.selectAll(".entry").classed("active", function(d) { return d.key === name; });
-		updateCallback(name, div);
+		updateCallback(hotel, div);
 	}
 	
 	list.render = function(){
@@ -110,12 +113,19 @@ function hotelList(){
 		entry.enter().append("div")
 			.attr("class", "entry")
 			.text(function(d){ return d.key.capitalize(); })
-			.on("mouseover", function(d){ if(!selected) updateCallback(d.key, this); })
-			.on("mouseout", function(d){ if(!selected) updateCallback(null, this); })
-			.on("click", function(d){ clicked(d.key, this); });
+			.on("mouseover", function(d){
+				if(!selected) updateCallback({name: d.key, rank:d.value.rank}, this);
+				hotelNameDiv.text(d.key);
+			})
+			.on("mouseout", function(d){
+				if(!selected) updateCallback({name: null, rank:0}, this);
+				hotelNameDiv.text("Generali");
+			})
+			.on("click", function(d){
+				clicked({name: d.key, rank:d.value.rank}, this);
+			});
 		
-		countDiv
-			.text(hotelInRegion.length);
+		countDiv.text(hotelInRegion.length);
 		
 		// And removes the old one that do not belong to the selected region
 		entry.exit().remove();
@@ -138,8 +148,7 @@ function hotelList(){
 			});
 		}
 		
-		countDiv
-			.text("NA");
+		countDiv.text("NA");
 		
 		return list;
 	};
@@ -225,22 +234,35 @@ function feedback(data){
 	
 	var hotels = hotelList()
 		.update(hotelChange);
+	
 	var turistChart = barChart(turistDiv)
 		.bar(d3.scale.linear()
-			.domain([0, 1000]))
+			.domain([0, 100]))
 		.pos(d3.scale.ordinal()
 			.domain([0, 10]))
 		.color(d3.scale.linear()
 			.range(["#6685e0", "#001a4c"])
 			.domain([0, 10]))
-		.formatText(d3.format("Kg"));
+		.formatText(d3.format("Kg"))
+		.callback(function(d, c){
+			d3.select(c).classed("over", d != null);
+			fb.filterCountry(d).renderAll();
+		});
+	
 	var sentiment = bulletChart(sentimentDiv);
+	
 	var feedList = feedbackList(feedListDiv).keys(tableHeaders);
+	
 	var trend = lineChart(trendDiv)
 		.x(function(d){ return d.key; })
 		.y(function(d){ return d.value.rank; });
 	
 	var formatDate = d3.time.format("%Y-%m-%d %H:%M:%S");
+	var formatFloat = d3.format(".2r");
+
+//	var rank = d3.select("#rank");
+	var rank = rankChart("rank");
+
 	
 	// Parses records to cast fields
 	data.forEach(function(d){
@@ -286,7 +308,7 @@ function feedback(data){
 	groupAllHotelFiltered.reduce(reduceBulletAdd, null, reduceBulletInit);
 	groupByHotel.reduce(reduceToRankAdd, reduceToRankRemove, reduceToRankInit).order(function(p){ return p.rank; });
 	groupByCountry.reduceCount();
-	groupByDate.reduce(reduceToRankAdd, reduceToRankRemove, reduceToRankInit).order(function(p){ return p.key; });
+	groupByDate.reduce(reduceToRankAdd, reduceToRankRemove, reduceToRankInit).order(function(p){ return +p.key; });
 	
 	/* ---- reduce functions ----*/
 	function reduceToRankAdd(p, v){
@@ -306,7 +328,7 @@ function feedback(data){
 				p.rank = 0;
 				return p;
 			}
-			p.rank = ((p.count * p.rank) - a) / p.count;
+			p.rank = (((p.count+1) * p.rank) - a) / p.count;
 		});
 		
 		return p;
@@ -387,6 +409,7 @@ function feedback(data){
 				count: hotelValue[idx].count
 			};
 		});
+		
 		return bullets;
 	}
 	
@@ -403,10 +426,6 @@ function feedback(data){
 		
 		return bHotel;
 	}*/
-	
-	function feedbacks(){
-		return feedbackByHotel.top(limit);
-	}
 	
 //	function hotelRanks(){
 //		return groupByHotel.reduce(reduceToRankAdd, null, reduceToRankInit).all();
@@ -447,18 +466,31 @@ function feedback(data){
 		return fb;
 	};
 	
+	fb.dateFilter = function(start, end){
+		feedbackByDate.filterRange([start, end]);
+		return fb;
+	};
+	
 	fb.renderAll = function(){
 		sentiment
 			.data(sentimentBullets())
 			.render();
 		
 		feedList
-			.data(feedbacks())
+			.data(feedbackByHotel.top(limit)
+					.sort(function(a, b){ return +a.date - +b.date; }))
+			.render();
+		
+		turistChart
+			.data(groupByCountry.all())
 			.render();
 		
 		trend
-			.data(groupByDate.all().filter(function(d){ return d.value.count != 0; }))
+			.data(groupByDate.all()
+					.filter(function(d){ return d.value.count + d.value.rank; })
+					.sort(function(a, b){ return a.key.getTime() - b.key.getTime(); }))
 			.render();
+		
 		return fb;
 	};
 	
@@ -470,10 +502,13 @@ function feedback(data){
 		return fb;
 	};
 	
-	fb.renderTurist = function(){
-		turistChart
-			.data(groupByCountry.all())
-			.render();
+	fb.renderHotelRank = function(r){
+		
+//		rank.data([r])
+//			.transition()
+//			.duration(duration)
+//			.text(function(d){ return formatFloat(d); });
+		rank.data(r).render();
 	};
 	
 	fb.visible = function(_bool){
@@ -490,9 +525,12 @@ function feedback(data){
 		return fb;
 	};
 	
-	function hotelChange(name, context){
-		console.log(name);
+	function hotelChange(hotel, context){
+		var name = hotel.name;
+		var rank = hotel.rank;
+		
 		fb.filterHotel(name);
+		fb.renderHotelRank(rank);
 		fb.renderAll();
 	}
 	
@@ -502,6 +540,7 @@ function feedback(data){
 		fb.renderAll();
 	}
 	
+	fb.dateFilter(d3.time.year.offset(new Date(), -2), new Date());		//FIXME: da integrare
 //	dispatch.on("regionChange.feedback", regionChange);
 	
 	return fb;

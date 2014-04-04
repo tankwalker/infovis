@@ -6,7 +6,6 @@ function barChart(div){
 	var width = 300,
 		height = 150,
 		margin = {left:10, top:0, right:0, bottom:0},
-		aspectRatio = .4,
 		thickness = 20,
 		labelWidth = 80,
 		name = null,
@@ -14,22 +13,24 @@ function barChart(div){
 		bar = null,
 		pos = null,
 		color = null,
-		formatText = d3.format("");
+		formatText = d3.format(""),
+		callback = function(d, c){ return; };
 	
 	var svg = d3.select("#"+div).append("svg")
 		.attr("width", width)
 		.attr("height", height)
 		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-	function setBoundaries(w, h){
-		width = w * aspectRatio;
+	function setBoundaries() {
+		width = window.w * .25;
+		height = width / 3;
 
-		pos.rangeRoundBands([0, height], .5, .7);
+		pos.rangeRoundBands([0, height], .8, .1);
 		bar.range([0, width - labelWidth - margin.left - margin.right]);
 
 		svg.attr("width", width)
-		.attr("height", height)
-		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+			.attr("height", height)
+			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 	};
 	
 	chart.render = function(){
@@ -37,7 +38,7 @@ function barChart(div){
 		var labelData = svg.selectAll(".label").data(data);
 		var textData = svg.selectAll(".textbar").data(data);
 		
-		setBoundaries(window.w, window.h);
+		setBoundaries();
 		
 		// Build skeleton for current data
 		rectData.enter().append("rect")
@@ -45,7 +46,9 @@ function barChart(div){
 			.attr("x", labelWidth)
 			.attr("y", function(d, i){return i * pos.rangeBand();})
 			.attr("width", 0)
-			.attr("height", thickness);
+			.attr("height", thickness)
+			.on("mouseover", function(d){ callback(d.key, this); })
+			.on("mouseout", function(d){ callback(null, this); });
 
 		labelData.enter().append("text")
 			.attr("class", "label")
@@ -90,7 +93,7 @@ function barChart(div){
 		svg.selectAll(".bar").transition()
 			.duration(duration)
 			.attr("width", function(d){ return bar(d.value); })
-			.style("fill", function(d, i){ return color(i); });
+			.attr("fill", function(d, i){ return color(i); });
 
 		svg.selectAll(".label").style("opacity", 1);
 
@@ -204,6 +207,13 @@ function barChart(div){
 		return chart;
 	};
 	
+	chart.callback = function(_call){
+		if(!arguments.length)
+			return;
+		callback = _call;
+		return chart;
+	};
+	
 	return chart;
 }
 
@@ -230,6 +240,7 @@ function bulletChart(divname){
 		.data(keys)
 		.enter().append("svg")
 			.attr("class", "bullet")
+			.attr("id", function(d){ return d; })
 			.attr("width", vertical ? width + margin.left + margin.right : 400)
 			.attr("height", vertical ? height + margin.top + margin.bottom: 80)
 		.append("g")
@@ -289,11 +300,7 @@ function bulletChart(divname){
 		}
 		
 		d3.keys(data).forEach(function(k){
-			// Adds the top value for the sentiment analisys to be consistent 
-//			var topValue = 5;
 			var bullet = data[k].bullet;
-			console.log(bullet);	//FIXME: debug
-//			bullet.ranges.push(topValue);
 			
 			// Import data and sort it to properly display each layer
 			// otherwise the biggest rect will cover the smallest in the DOM
@@ -301,10 +308,10 @@ function bulletChart(divname){
 			var measurez = bullet.measures.sort(d3.descending);
 			var markerz = bullet.markers.sort(d3.descending);
 			
+			var g = d3.select("#" + k + " g");
+			
 			// Update the range rects.
-			var range = svg.selectAll("rect.range");
-
-			range.data(rangez)
+			g.selectAll("rect.range").data(rangez)
 				.enter().append("rect")
 				.attr("class", function(d, i) { return "range r" + i; })
 				.attr("height", vertical ? 0 : thickness)
@@ -312,17 +319,14 @@ function bulletChart(divname){
 				.attr("x", 0)
 				.attr("y", vertical ? length : 0);
 
-			range.data(rangez)
-				.transition()
+			g.selectAll("rect.range").transition()
 				.duration(duration)
-				.attr(vertical ? "height" : "width", function(d){return bar(d);})
+				.attr(vertical ? "height" : "width", function(d){return isNaN(d) ? 0 : bar(d);})
 				.attr("y", vertical ? function(d){ return length - bar(d); } : 0);
 
 
 			// Update the measure rects.
-			var measure = svg.selectAll("rect.measure");
-
-			measure.data(measurez)
+			g.selectAll("rect.measure").data(measurez)
 				.enter().append("rect")
 				.attr("class", function(d, i){ return "measure m" + i; })
 				.attr("height", vertical ? 0 : thickness / 3)
@@ -330,27 +334,23 @@ function bulletChart(divname){
 				.attr("x", vertical ? thickness / 3 : 0)
 				.attr("y", vertical ? length : thickness / 3);
 
-			measure.data(measurez)
-				.transition()
+			g.selectAll("rect.measure").transition()
 				.duration(duration)
-				.attr(vertical ? "height" : "width", function(d){ return bar(d); })
+				.attr(vertical ? "height" : "width", function(d){ return isNaN(d) ? 0 : bar(d); })
 				.attr("y", vertical ? function(d){ return length - bar(d); } : thickness / 3);
 
 			
 			// Update the marker lines.
-			var marker = svg.selectAll("line.marker");
-
-			marker.data(markerz)
+			g.selectAll("line.marker").data(markerz)
 				.enter().append("line")
 				.attr("class", "marker")
 				.attr(vertical ? "x1" : "y1", thickness / 6)
 				.attr(vertical ? "x2" : "y2", thickness * 5 / 6);
 
-			marker.data(markerz)
-				.transition()
+			g.selectAll("line.marker").transition()
 				.duration(duration)
-				.attr(vertical ? "y1" : "x1", function(d){ return bar(d); })
-				.attr(vertical ? "y2" : "x2", function(d){ return bar(d); });
+				.attr(vertical ? "y1" : "x1", function(d){ return isNaN(d) ? 0 : bar(d); })
+				.attr(vertical ? "y2" : "x2", function(d){ return isNaN(d) ? 0 : bar(d); });
 
 			
 			title.transition()
@@ -449,11 +449,18 @@ function lineChart(divName){
 		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 	
 	var line = d3.svg.line()
-		.interpolate("monotone")
+		.interpolate("cardinal")
 		.x(function(d){ return x(getX(d)); })
 		.y(function(d){ return y(getY(d)); });
 	
+	var maker = svg.append("line")
+		.attr("class", "marker");
+	
 	function initAxis(){
+//		x.domain(d3.extent(data, getX));
+		x.domain([d3.time.year.offset(new Date(), -2), new Date()]);
+		y.domain([0, 5]);
+		
 		// Build skeleton
 		svg.append("g")
 			.attr("class", "x axis")
@@ -478,34 +485,33 @@ function lineChart(divName){
 			.text(function(d){ return d; });
 		
 		svg.append("path")
-			.attr("class", "line")
-			.style("stroke-width", thickness + "px")
-			.style("stroke", color);
+			.attr("class", "line");
+		
 	}
 	
 	chart.render = function(){
 		// Update data
 		if(!data || !data.length){
-			svg.selectAll(".line").transition()
-			.duration(duration)
-			.style("opacity", 0);
-			
 			error = {name: "warning", message: "No data"};
 			console.warn(error.message);
 			return error;
 		}
-
-		x.domain(d3.extent(data, getX));
-		y.domain([0, 5]);
 		
-		svg.select(".x.axis").call(xAxis);
-		svg.select(".y.axis").call(yAxis);
-		
-		svg.select(".line").data([data])
-			.transition()
-			.duration(duration)
+		svg.select(".line").datum(data)
+//			.transition()
+//			.duration(duration)
 			.attr("d", line);
 
+		var dots = svg.selectAll(".dot").data(data, function(d){ return getY(d)*7+getX(d); });	//TODO: trova chiave migliore
+		
+		dots.enter().append("circle")
+			.attr("class", "dot")
+			.attr("r", 3.5)
+			.attr("cx", function(d) { return x(getX(d)); })
+			.attr("cy", function(d) { return y(getY(d)); });
+
+		dots.exit().remove();
+		
 		return chart;
 	};
 	
@@ -560,7 +566,7 @@ function lineChart(divName){
 		if(!arguments.length)
 			return;
 		getY = _y;
-		line.y(function(d){/*console.log(d); console.log("d = " + d.value.rank + "| y(d) = " + y(_y(d)));*/ return y(_y(d)); });
+		line.y(function(d){ return y(_y(d)); });
 		return chart;
 	};
 	
@@ -640,6 +646,108 @@ function lineChart(divName){
 	};
 	
 	initAxis();
+	
+	return chart;
+}
+
+function rankChart(divName){
+	var chart = {};
+	
+	var width = 120,
+		height = 120,
+		pi = Math.PI,
+		radius = Math.min(width, height) / 2,
+		data = 0;
+	
+	var empty = -pi / 2,
+		full = pi / 2;
+	
+	var linear = d3.scale.linear()
+		.range([empty, full])
+		.domain([0, 5]);
+	
+	var format = d3.format(".2r");
+
+	var arc = d3.svg.arc()
+		.startAngle(-pi/2)
+		.outerRadius(radius - 10)
+		.innerRadius(radius - 30);
+	
+	var svg = d3.select("#"+divName).append("svg")
+		.attr("width", width)
+		.attr("height", height)
+		.append("g")
+		.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+	var meter = svg.append("g")
+		.attr("class", "progress-meter");
+
+	meter.append("path")
+		.datum({endAngle: full})
+		.attr("class", "background")
+		.attr("d", arc);
+
+	var foreground = meter.append("path")
+		.datum({endAngle: empty})
+		.attr("class", "foreground")
+		.attr("d", arc);
+
+	var text = meter.append("text")
+		.attr("text-anchor", "middle")
+		.attr("dy", ".35em")
+		.style("stroke", "#ccc")
+		.style("fill", "#fff");
+
+	function arcTween(transition, newAngle) {
+		transition.attrTween("d", function(d) {
+			var interpolate = d3.interpolate(d.endAngle, newAngle);
+			return function(t) {
+				d.endAngle = interpolate(t);
+				return arc(d);
+			};
+		});
+	}
+	
+	chart.render = function() {
+		if(data == null)
+			data = 0;
+		
+		foreground.transition()
+			.duration(duration)
+			.call(arcTween, linear(data));
+
+		text.text(format(data));
+		
+		return chart;
+	};
+
+	chart.width = function(_){
+		if(!arguments.length)
+			return width;
+		width = _;
+		return chart;
+	};
+	
+	chart.height = function(_){
+		if(!arguments.length)
+			return height;
+		height = _;
+		return chart;
+	};
+	
+	chart.radius = function(_){
+		if(!arguments.length)
+			return radius;
+		radius = _;
+		return chart;
+	};
+	
+	chart.data = function(_){
+		if(!arguments.length)
+			return data;
+		data = _;
+		return chart;
+	};
 	
 	return chart;
 }

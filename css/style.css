@@ -5,6 +5,25 @@
 	fill:none;
 }
 
+.region {
+	fill: gray;
+	stroke: black;
+	stroke-width: 0.5;
+}
+
+.region.active {
+	fill: orange;
+	stroke: white;
+	stroke-width: 1px;
+}
+
+.region.highlight {
+	stroke: white;
+	stroke-width: 1;
+	fill: #ccc;
+}
+
+/*** Line chart ***/
 .axis path,
 .axis line {
   fill: none;
@@ -23,26 +42,12 @@
 
 .line {
   fill: none;
-  stroke: white;
+  stroke: rgb(120, 199, 142);
   stroke-width: 1.5px;
 }
 
-.region {
-	fill: gray;
-	stroke: black;
-	stroke-width: 0.5;
-}
-
-.region.active {
-	fill: orange;
-	stroke: white;
-	stroke-width: 1px;
-}
-
-.region.highlight {
-	stroke: white;
-	stroke-width: 1;
-	fill: #ccc;
+.dot {
+	fill: rgb(80, 159, 102);
 }
 
 
@@ -67,18 +72,21 @@ header {
 	margin: 8px;
 }
 
-h1 {
+h1,
+h1 > * {
 	font-size: 20pt;
 	font-weight: 200;
 }
 
-h2 {
+h2,
+h2 > * {
 	color: #ffcc00;
 	font-size: 18pt;
 	font-weight: 200;
 }
 
-h3 {
+h3,
+h3 > * {
 	font-weight: 300;
 }
 
@@ -102,13 +110,13 @@ h3 {
 .bullet .title { font-size: 14px; font-weight: bold; fill: #fff;}
 .bullet .subtitle { fill: #eee; }
 
-.bar {
-	fill: #ffffff;
+.bar.over {
+	fill: orange;
 }
 
 .inline {
 	display: inline-block;
-	margin-left: 5px;
+	/* margin-left: 5px; */
 }
 
 .entry {
@@ -126,7 +134,8 @@ h3 {
 }
 
 .entry.active {
-    background-color: rgba(250, 120, 46, .4);
+    /* background-color: rgba(250, 120, 46, .4); */
+    background-color: orange;
 }
 
 .section {
@@ -166,13 +175,13 @@ h3 {
 
 #hotels {
 	min-width: 400px;
-	max-heigth: 300px;
-	position: absolute;
-	top: 50px;
+	max-height: 260px;
+/* 	position: absolute;
+	top: 50px; */
 	right: 10px;
 	overflow: auto;
 	position: fixed;
-	top: 200px;
+	top: 50px;
 }
 
 #map {
@@ -188,12 +197,22 @@ h3 {
 	right: 10px;*/
 	padding: 10px;
 	background: rgba(0, 0, 0, .3);
+	z-index: -10;
+}
+
+#rank-wrapper {
+	font-weight: 200;
+	background-color: #333;
+	padding: 10px 40px 10px 40px;
+	border-radius: 15px;
+	text-align: center;
 }
 
 /*** Feedback table ***/
 #table-wrapper {
   position: relative;
   width: 50%;
+  margin-right: 10px;
 }
 
 #table-scroll {
@@ -241,7 +260,23 @@ th, th > span {
 }
 
 
-/**** Trend analysis ****/
+/*** Trend analysis ***/
 #trend-analysis {
 	color: white;
+	margin-left: 10px;
+}
+
+/*** Rank chart ***/
+.progress-meter .background {
+	fill: #ccc;
+}
+
+.progress-meter .foreground {
+	fill: #334455;
+}
+
+.progress-meter text {
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-size: 24px;
+	font-weight: bold;
 }
