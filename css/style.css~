@@ -5,11 +5,8 @@
 	fill:none;
 }
 
-path {
-	fill: gray;
-}
-
 .region {
+	fill: gray;
 	stroke: black;
 	stroke-width: 0.5;
 }
@@ -26,6 +23,49 @@ path {
 	fill: #ccc;
 }
 
+/*** Line chart ***/
+.area {
+	fill: #4a6150;/*rgb(74, 97, 80);*/
+	fill-opacity: .5;
+	stroke: none;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #fff;
+  shape-rendering: crispEdges;
+}
+
+#trend-analysis .axis line {
+	fill: none;
+	stroke-opacity: .125;
+	stroke-width: .5px;
+}
+
+.x.axis path {
+	
+}
+
+.axis text {
+	fill: none;
+	stroke: #909090;
+}
+
+.line {
+  fill: none;
+  stroke: #78c78e; /*rgb(120, 199, 142);*/
+  stroke-width: 2px;
+}
+
+.dot {
+	fill: rgb(80, 159, 102);
+}
+
+.brush {
+	fill: #fff;
+	fill-opacity: .125;
+}
 
 /***** HTML-CSS *****/
 
@@ -48,19 +88,22 @@ header {
 	margin: 8px;
 }
 
-h1 {
+h1,
+h1 > * {
 	font-size: 20pt;
 	font-weight: 200;
 }
 
-h2 {
+h2,
+h2 > * {
 	color: #ffcc00;
 	font-size: 18pt;
 	font-weight: 200;
 }
 
-h3 {
-	
+h3,
+h3 > * {
+	font-weight: 300;
 }
 
 /* Classes */
@@ -83,12 +126,13 @@ h3 {
 .bullet .title { font-size: 14px; font-weight: bold; fill: #fff;}
 .bullet .subtitle { fill: #eee; }
 
-.bar {
-	fill: #ffffff;
+.bar.over {
+	fill: orange;
 }
 
 .inline {
 	display: inline-block;
+	/* margin-left: 5px; */
 }
 
 .entry {
@@ -103,6 +147,11 @@ h3 {
 
 .entry:hover {
     background-color: rgba(255, 255, 255, .4);
+}
+
+.entry.active {
+    /* background-color: rgba(250, 120, 46, .4); */
+    background-color: orange;
 }
 
 .section {
@@ -142,9 +191,13 @@ h3 {
 
 #hotels {
 	min-width: 400px;
-	position: absolute;
-	top: 50px;
+	max-height: 260px;
+/* 	position: absolute;
+	top: 50px; */
 	right: 10px;
+	overflow: auto;
+	position: fixed;
+	top: 50px;
 }
 
 #map {
@@ -160,4 +213,86 @@ h3 {
 	right: 10px;*/
 	padding: 10px;
 	background: rgba(0, 0, 0, .3);
+	z-index: -10;
+}
+
+#rank-wrapper {
+	font-weight: 200;
+	background-color: #333;
+	padding: 10px 40px 10px 40px;
+	border-radius: 15px;
+	text-align: center;
+}
+
+/*** Feedback table ***/
+#table-wrapper {
+  position: relative;
+  width: 50%;
+  margin-right: 10px;
+}
+
+#table-scroll {
+  height: 300px;
+  overflow: auto;  
+  margin-top: 20px;
+}
+
+#table-wrapper table thead th > span {
+  position: absolute;   
+  top: -20px;
+}
+
+table {
+  max-width: 100%;
+  background-color: transparent;
+}
+th, th > span {
+  text-align: left;
+  font-weight: bold;
+}
+.table {
+  width: 100%;
+  margin-bottom: 20px;
+}
+.table > thead > tr > th,
+.table > tbody > tr > th,
+.table > tfoot > tr > th,
+.table > thead > tr > td,
+.table > tbody > tr > td,
+.table > tfoot > tr > td {
+  padding: 8px;
+  line-height: 1.42857143;
+  vertical-align: top;
+  border-top: 1px solid #ddd;
+}
+.table > thead > tr > th {
+  vertical-align: bottom;
+  border-bottom: 2px solid #ddd;
+}
+
+.table-hover > tbody > tr:hover > td,
+.table-hover > tbody > tr:hover > th {
+  background-color: #555;
+}
+
+
+/*** Trend analysis ***/
+#trend-analysis {
+	color: white;
+	margin-left: 10px;
+}
+
+/*** Rank chart ***/
+.progress-meter .background {
+	fill: #ccc;
+}
+
+.progress-meter .foreground {
+	fill: #334455;
+}
+
+.progress-meter text {
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-size: 24px;
+	font-weight: bold;
 }

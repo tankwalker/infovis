@@ -436,7 +436,9 @@ function lineChart(divName){
 		.orient("bottom")
 		.ticks(d3.time.month, 3)
 		.tickFormat(d3.time.format("%b %Y"))
-		.tickPadding(8);
+		.tickPadding(8)
+		.tickSize(-height)
+		.tickSubdivide(true);
 
 	var yAxis = d3.svg.axis()
 		.scale(y)
@@ -453,41 +455,97 @@ function lineChart(divName){
 		.x(function(d){ return x(getX(d)); })
 		.y(function(d){ return y(getY(d)); });
 	
+	var area = d3.svg.area()
+		.interpolate("cardinal")
+		.x(function(d){ return x(getX(d)); })
+		.y0(height)
+		.y1(function(d){ return y(getY(d)); });
+	
+	
+	/**********************************************/
+	brush = d3.svg.brush()	
+		.x(x)
+		.on("brushend", brushend);
+	
+	var brushFilter = null;
+	
+	function brushend() {
+		if(!d3.event.sourceEvent) return;
+		
+		if(brush.empty())
+			brush.clear();
+		
+		var rawExtent = brush.extent(),
+			extent = rawExtent.map(d3.time.month.round);
+		
+		console.log(extent);
+		
+		d3.select(this).transition()
+			.duration(duration)
+			.call(brush.extent(extent))
+			.call(brush.event);
+		
+		// update filtering if enabled
+		if(brushFilter){
+			brushFilter(extent);
+		}
+	}
+	/**********************************************/
+	
+//		x.domain(d3.extent(data, getX));
+	x.domain([d3.time.year.offset(new Date(), -2), new Date()]);
+	y.domain([0, 5]);
+	
+	// Build skeleton
+	// x axis
+	svg.append("g")
+		.attr("class", "x axis")
+		.attr("transform", "translate(0," + height + ")")
+		.call(xAxis)
+		.append("text")
+		.data(xAxisLabel)
+		.attr("y", 6)
+		.attr("dy", ".71em")
+		.style("text-anchor", "end")
+		.text(function(d){ return d; });
+
+	// y axis
+	svg.append("g")
+		.attr("class", "y axis")
+		.call(yAxis)
+		.append("text")
+		.data(yAxisLabel)
+//		.attr("transform", "rotate(-90)")
+		.attr("y", 6)
+		.attr("dy", ".71em")
+		.style("text-anchor", "end")
+		.text(function(d){ return d; });
+	
+	// area
+	svg.append("path")
+		.attr("class", "area");
+	
+	// line
+	svg.append("path")
+		.attr("class", "line");
+	
+	// markers
+	var dots = svg.append("g")
+		.attr("class", "markers");
+	
+	// line marker position
 	var maker = svg.append("line")
 		.attr("class", "marker");
 	
-	function initAxis(){
-//		x.domain(d3.extent(data, getX));
-		x.domain([d3.time.year.offset(new Date(), -2), new Date()]);
-		y.domain([0, 5]);
-		
-		// Build skeleton
-		svg.append("g")
-			.attr("class", "x axis")
-			.attr("transform", "translate(0," + height + ")")
-			.call(xAxis)
-			.append("text")
-			.data(xAxisLabel)
-			.attr("y", 6)
-			.attr("dy", ".71em")
-			.style("text-anchor", "end")
-			.text(function(d){ return d; });
-
-		svg.append("g")
-			.attr("class", "y axis")
-			.call(yAxis)
-			.append("text")
-			.data(yAxisLabel)
-	//		.attr("transform", "rotate(-90)")
-			.attr("y", 6)
-			.attr("dy", ".71em")
-			.style("text-anchor", "end")
-			.text(function(d){ return d; });
-		
-		svg.append("path")
-			.attr("class", "line");
-		
-	}
+	// brush selector
+	var gBrush = svg.append("g")
+		.attr("class", "brush")
+		.call(brush)
+		.call(brush.event);
+	
+	gBrush.selectAll("rect")
+		.attr("height", height);
+	
 	
 	chart.render = function(){
 		// Update data
@@ -497,21 +555,26 @@ function lineChart(divName){
 			return error;
 		}
 		
+		// line
 		svg.select(".line").datum(data)
 //			.transition()
 //			.duration(duration)
 			.attr("d", line);
-
-		var dots = svg.selectAll(".dot").data(data, function(d){ return getY(d)*7+getX(d); });	//TODO: trova chiave migliore
 		
-		dots.enter().append("circle")
+		
+		// markers
+		dots.selectAll(".dot").remove();
+		dots.selectAll(".dot").data(data)
+			.enter().append("circle")
 			.attr("class", "dot")
-			.attr("r", 3.5)
+			.attr("r", 3)
 			.attr("cx", function(d) { return x(getX(d)); })
 			.attr("cy", function(d) { return y(getY(d)); });
 
-		dots.exit().remove();
-		
+		// area
+		svg.select(".area").datum(data)
+			.attr("d", area);
+			
 		return chart;
 	};
 	
@@ -645,7 +708,12 @@ function lineChart(divName){
 		return chart;
 	};
 	
-	initAxis();
+	chart.filter = function(_bfilter){
+		if(!arguments.length)
+			return brushFilter;
+		brushFilter = _bfilter;
+		return chart;
+	}
 	
 	return chart;
 }

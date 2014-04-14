@@ -24,11 +24,22 @@
 }
 
 /*** Line chart ***/
+.area {
+	fill: #4a6150;/*rgb(74, 97, 80);*/
+	fill-opacity: .5;
+	stroke: none;
+}
+
 .axis path,
 .axis line {
   fill: none;
   stroke: #fff;
   shape-rendering: crispEdges;
+}
+
+#trend-analysis .axis line {
+	fill: none;
+	stroke-opacity: .125;
 }
 
 .x.axis path {
@@ -42,14 +53,18 @@
 
 .line {
   fill: none;
-  stroke: rgb(120, 199, 142);
-  stroke-width: 1.5px;
+  stroke: #78c78e; /*rgb(120, 199, 142);*/
+  stroke-width: 2px;
 }
 
 .dot {
 	fill: rgb(80, 159, 102);
 }
 
+.brush {
+	fill: #fff;
+	fill-opacity: .125;
+}
 
 /***** HTML-CSS *****/
 
