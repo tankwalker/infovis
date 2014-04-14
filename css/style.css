@@ -1,96 +1,151 @@
 @CHARSET "UTF-8";
 
-/****** D3 topojson ******/
-.background {
-	fill:none;
-}
-
-.region {
-	fill: gray;
-	stroke: black;
-	stroke-width: 0.5;
-}
-
-.region.active {
-	fill: orange;
-	stroke: white;
-	stroke-width: 1px;
-}
-
-.region.highlight {
-	stroke: white;
-	stroke-width: 1;
-	fill: #ccc;
-}
-
-/*** Line chart ***/
-.axis path,
-.axis line {
-  fill: none;
-  stroke: #fff;
-  shape-rendering: crispEdges;
-}
-
-.x.axis path {
-	
-}
-
-.axis text {
-	fill: none;
-	stroke: #909090;
-}
-
-.line {
-  fill: none;
-  stroke: rgb(120, 199, 142);
-  stroke-width: 1.5px;
-}
-
-.dot {
-	fill: rgb(80, 159, 102);
-}
-
-
 /***** HTML-CSS *****/
-
-/* Elements */
 * {
 	color: white;
-	/* font-family: 'Fanwood Text', serif; */
 	font-family: 'Raleway', sans-serif;
 	font-weight: 200;
 }
 
 body {
-	background-color: #222;
+	background-color: #111;
 	margin: 0px;
 }
 
 header {
-	font-size: 30pt;
+	font-size: 22pt;
 	font-weight: 400;
 	margin: 8px;
 }
 
 h1,
 h1 > * {
-	font-size: 20pt;
+	font-size: 14pt;
 	font-weight: 200;
 }
 
 h2,
 h2 > * {
 	color: #ffcc00;
-	font-size: 18pt;
+	font-size: 14pt;
 	font-weight: 200;
 }
 
 h3,
 h3 > * {
 	font-weight: 300;
+	font-size: 11pt;
 }
 
-/* Classes */
+/****** Map ******/
+#map {
+	/* position: absolute;
+	top: 80px;
+	left: 450px; */
+}
+
+#map .background {
+	fill:none;
+}
+
+#map .region {
+	fill: gray;
+	stroke: #111;
+	stroke-width: .2;
+}
+
+#map .region.active {
+	fill: orange;
+	stroke: white;
+	stroke-width: 1px;
+}
+
+#map .region.highlight {
+	stroke: white;
+	stroke-width: 1;
+	fill: #ddd;
+}
+
+
+/*** Trend analysis ***/
+#trend-analysis {
+	color: white;
+	margin-left: 10px;
+}
+
+#trend-analysis .axis path, .axis line {
+  fill: none;
+  stroke: #fff;
+  shape-rendering: crispEdges;
+}
+
+#trend-analysis .x.axis path {
+	
+}
+
+#trend-analysis .axis text {
+	fill: none;
+	stroke: #909090;
+}
+
+#trend-analysis .line {
+  fill: none;
+  stroke: rgb(120, 199, 142);
+  stroke-width: 1.5px;
+}
+
+#trend-analysis .dot {
+	fill: rgb(80, 159, 102);
+}
+/**** Bar Chart ****/
+.bar {
+	fill: #ddd;
+	stroke: #eee;
+	stroke-width: 1px;
+}
+
+.bar.over {
+	fill: orange;
+}
+
+text.textbar {
+	font-size: 10pt;
+}
+
+text.label {
+	font-size: 10pt;
+}
+
+.axis {
+  stroke: #fff;
+  stroke-width: .5px;
+  font-size: 8pt;
+}
+
+.axis path {
+	display: none;
+}
+
+.axis path,.axis line {
+	fill: none;
+	stroke: none;
+	shape-rendering: crispEdges;
+}
+
+.axis.minor line {
+	stroke: #232323;
+	stroke-width: 1px;
+}
+
+.x.axis {
+	
+}
+
+.y.axis {
+	stroke: #ccc;
+}
+
+/**** Classes ****/
 .ball {
 	display: inline-block;
 	width: 15px;
@@ -110,12 +165,9 @@ h3 > * {
 .bullet .title { font-size: 14px; font-weight: bold; fill: #fff;}
 .bullet .subtitle { fill: #eee; }
 
-.bar.over {
-	fill: orange;
-}
-
 .inline {
 	display: inline-block;
+	vertical-align: top;
 	/* margin-left: 5px; */
 }
 
@@ -138,16 +190,6 @@ h3 > * {
     background-color: orange;
 }
 
-.section {
-	/*background-color: rgba(71,71,71,0.8);*/
-}
-
-.textpie {
-	text-align: center;
-	font-weight: bold;
-	font-size: 10pt;
-}
-
 .visible {
 	display: block;
 }
@@ -163,10 +205,16 @@ h3 > * {
 	display: none;
 }
 
+
 /* IDs */
 
+#wrapper {
+	width:100%;
+	height: 100%;
+}
+
 #lside {
-	min-width: 380px;
+	min-width: 40%;
 	margin: 8px;
 /* 	position: absolute;
 	top: 20px;
@@ -174,20 +222,14 @@ h3 > * {
 }
 
 #hotels {
-	min-width: 400px;
+	min-width: 20%;
 	max-height: 260px;
 /* 	position: absolute;
 	top: 50px; */
 	right: 10px;
 	overflow: auto;
-	position: fixed;
-	top: 50px;
-}
-
-#map {
-	position: absolute;
-	top: 80px;
-	left: 450px;
+/* 	position: fixed;
+	top: 50px; */
 }
 
 #sentiment {
@@ -200,9 +242,14 @@ h3 > * {
 	z-index: -10;
 }
 
+#feedback {
+	max-width: 600px;
+	margin-left: 20px;
+}
+
 #rank-wrapper {
 	font-weight: 200;
-	background-color: #333;
+	background-color: rgba(255, 255, 255, .05);
 	padding: 10px 40px 10px 40px;
 	border-radius: 15px;
 	text-align: center;
@@ -259,12 +306,6 @@ th, th > span {
   background-color: #555;
 }
 
-
-/*** Trend analysis ***/
-#trend-analysis {
-	color: white;
-	margin-left: 10px;
-}
 
 /*** Rank chart ***/
 .progress-meter .background {

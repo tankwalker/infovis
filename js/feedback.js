@@ -114,15 +114,20 @@ function hotelList(){
 			.attr("class", "entry")
 			.text(function(d){ return d.key.capitalize(); })
 			.on("mouseover", function(d){
-				if(!selected) updateCallback({name: d.key, rank:d.value.rank}, this);
-				hotelNameDiv.text(d.key);
+				if(!selected){
+					updateCallback({name: d.key, rank:d.value.rank}, this);
+					hotelNameDiv.text(d.key);
+				}
 			})
 			.on("mouseout", function(d){
-				if(!selected) updateCallback({name: null, rank:0}, this);
-				hotelNameDiv.text("Generali");
+				if(!selected){
+					updateCallback({name: null, rank:0}, this);
+					hotelNameDiv.text("Italia");
+				}
 			})
 			.on("click", function(d){
 				clicked({name: d.key, rank:d.value.rank}, this);
+				hotelNameDiv.text(d.key);
 			});
 		
 		countDiv.text(hotelInRegion.length);
@@ -235,11 +240,8 @@ function feedback(data){
 	var hotels = hotelList()
 		.update(hotelChange);
 	
-	var turistChart = barChart(turistDiv)
-		.bar(d3.scale.linear()
-			.domain([0, 100]))
-		.pos(d3.scale.ordinal()
-			.domain([0, 10]))
+	var turistChart = verticalBarChart(turistDiv)
+		.height(120).width(256)
 		.color(d3.scale.linear()
 			.range(["#6685e0", "#001a4c"])
 			.domain([0, 10]))
@@ -249,7 +251,10 @@ function feedback(data){
 			fb.filterCountry(d).renderAll();
 		});
 	
-	var sentiment = bulletChart(sentimentDiv);
+	var sentiment = bulletChart(sentimentDiv)
+		.thickness(15)
+		.width(200)
+		.heigth(50);
 	
 	var feedList = feedbackList(feedListDiv).keys(tableHeaders);
 	
@@ -258,9 +263,7 @@ function feedback(data){
 		.y(function(d){ return d.value.rank; });
 	
 	var formatDate = d3.time.format("%Y-%m-%d %H:%M:%S");
-	var formatFloat = d3.format(".2r");
 
-//	var rank = d3.select("#rank");
 	var rank = rankChart("rank");
 
 	
@@ -309,6 +312,7 @@ function feedback(data){
 	groupByHotel.reduce(reduceToRankAdd, reduceToRankRemove, reduceToRankInit).order(function(p){ return p.rank; });
 	groupByCountry.reduceCount();
 	groupByDate.reduce(reduceToRankAdd, reduceToRankRemove, reduceToRankInit).order(function(p){ return +p.key; });
+	regionRank = feedbackByHotelFilter.groupAll().reduce(reduceToRankAdd, reduceToRankRemove, reduceToRankInit);
 	
 	/* ---- reduce functions ----*/
 	function reduceToRankAdd(p, v){
@@ -491,6 +495,9 @@ function feedback(data){
 					.sort(function(a, b){ return a.key.getTime() - b.key.getTime(); }))
 			.render();
 		
+		rank.data(regionRank.value().rank)
+			.render();
+		
 		return fb;
 	};
 	
@@ -503,11 +510,6 @@ function feedback(data){
 	};
 	
 	fb.renderHotelRank = function(r){
-		
-//		rank.data([r])
-//			.transition()
-//			.duration(duration)
-//			.text(function(d){ return formatFloat(d); });
 		rank.data(r).render();
 	};
 	
@@ -540,7 +542,7 @@ function feedback(data){
 		fb.renderAll();
 	}
 	
-	fb.dateFilter(d3.time.year.offset(new Date(), -2), new Date());		//FIXME: da integrare
+	fb.dateFilter(d3.time.year.offset(new Date(), -2), new Date());		//FIXME: da integrare con slider
 //	dispatch.on("regionChange.feedback", regionChange);
 	
 	return fb;

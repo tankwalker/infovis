@@ -25,7 +25,7 @@ var window = {};
 window.w = $(window).width();
 window.h = $(window).height();
 
-var detailDim = {ratio:0.2, min:100, max:500};	// Min, max Width and ratio of the details section relative to the window's one
+var detailDim = {ratio:0.2, min:256, max:500};	// Min, max Width and ratio of the details section relative to the window's one
 var mapDim = {ratio:0.45, min:200, max:800};		// Min, max Width and ratio of the map section relative to the window's one
 
 var duration = 350;				// Duration of transitions
@@ -88,27 +88,22 @@ function mapBuild(){
 			.on("click", selected)
 			.on("mouseover", function(d){ highlight(d); })
 			.on("mouseout", function(d){ highlight(null); });
-
-//		sub.selectAll(".region-border")
-//			.datum(boundaries)
-//			.enter().append("borders")
-//			.attr("class", "region-border")
-//			.attr("d", path);
 	
-//	circles = gcircles.selectAll(".ranking")
-//		.data(ranking)
-//		.enter().append("circle")
-//			.attr("class", "ranking");
+	circles = gcircles.selectAll(".ranking")
+		.data(ranking)
+		.enter().append("circle")
+			.attr("class", "ranking");
 	
 	function drawMap(){
 		sub.selectAll(".region")
 			.attr("d", path);
 		
 		gcircles.selectAll(".ranking")
-			.attr("r", function(d){return d.values.value * 3;})
+			.attr("r", function(d){return 3/*d.values.value * 3*/;}) //TODO: area in funzione del feedback rate
 			.attr("cx", function(d){return projection(d.values.coordinates)[0];})
 			.attr("cy", function(d){return projection(d.values.coordinates)[1];});
 	};
+	drawMap();
 	
 	function selected(region){
 		var x, y, zoom;
@@ -200,7 +195,13 @@ function mapBuild(){
 			sub.selectAll("path")
 				.classed("highlight", false);
 			
-			feedback.filterRegion(null);
+			feedback.filterRegion(null)
+				.filterHotel(null)
+				.filterCountry(null)
+				.renderAll();
+			
+			regionSelected.name = "Italia";
+			
 		} else {
 		
 		// Select the region
@@ -216,6 +217,7 @@ function mapBuild(){
 			// List all the hotel for the selected region
 			feedback.filterRegion(regionSelected.name)
 				.filterHotel(null)
+				.filterCountry(null)
 				.renderAll();
 			
 			// Dispatch the stateChane event to update all the charts
@@ -225,7 +227,9 @@ function mapBuild(){
 	
 	
 	function resize (w, h){
-		width = w * mapDim.ratio,
+		var dim = Math.min(w, h);
+		
+		width = dim * mapDim.ratio,
 		height = width * 3/4;
 		
 		svg.attr("width", width)
@@ -238,8 +242,6 @@ function mapBuild(){
 		drawMap();
 	};
 	
-	drawMap();
-	
 	dispatch.on("resize.map", resize);
 }
 
@@ -249,20 +251,13 @@ function mapBuild(){
  */
 function coffeeCompBuild(){
 	var width = detailDim.min,
-		height = 150;
-	
-	var thickness = 20;			// height of a single bar
-	var labelWidth = 60;		// width of the label
-	var margin = {left:10, top:0, right:70, bottom:0};
+		height = width / 3;
 	
 	var xcoffee = crossfilter(coffeeFan);
 	var coffeeByRegion = xcoffee.dimension(function(d){ return d.region; });
 	
 	var color = d3.scale.linear()
 		.range(["#ffcc00", "#4c3300"])
-		.domain([0, 10]);
-
-	var pos = d3.scale.ordinal()
 		.domain([0, 10]);
 	
 	var bar = d3.scale.linear()
@@ -271,8 +266,9 @@ function coffeeCompBuild(){
 	var kgFormat = function(d){ return d + " Kg"; };
 	
 	var chart = barChart("fan-chart")
+		.width(width)
+		.height(height)
 		.bar(bar)
-		.pos(pos)
 		.color(color)
 		.formatText(kgFormat);
 	
@@ -300,18 +296,14 @@ function coffeeCompBuild(){
  */
 function coffeeConsumeBuild(){
 	var width = detailDim.min,
-		height = 70;
-	var labelWidth = 10;
-	var margin = {left:10, top:0, right:70, bottom:0};
+		height = width / 3;
 	
 	var xcoffee = crossfilter(coffeeConsume);
 	var coffeeByRegion = xcoffee.dimension(function(d){ return d.region; });
+	var coffeeTotal = coffeeByRegion.group();
 	
 	var bar = d3.scale.linear()
 		.domain([0, 1000]);
-	
-	var pos = d3.scale.ordinal()
-		.domain([0, 10]);
 	
 	var color = d3.scale.linear()
 		.range(["#4c2511", "#cc6600"])
@@ -320,13 +312,16 @@ function coffeeConsumeBuild(){
 	var percentage = d3.format(".1%");
 
 	var chart = barChart("consume-chart")
+		.width(width)
+		.height(height)
 		.bar(bar)
-		.pos(pos)
 		.color(color)
 		.formatText(percentage);
 	
 	function stateChange(region){
 		var data = d3.entries(coffeeByRegion.filter(region).top(1)[0]).filter(function(d){ return d.key !== "region"; });
+		data.forEach(function(d){ d.value = +d.value / 100; });
+		console.log(data);
 		chart.data(data)
 			.render();
 	}
@@ -341,6 +336,17 @@ function coffeeConsumeBuild(){
 	return chart;
 };
 
+
+/**
+ * ------- updateDetails --------
+ * Updates static information (not driven by d3) of the detail
+ * section in order to be aligned to d3's data displayed
+ */
+function updateDetails(){
+	// Title
+	d3.select("#region-name")
+		.text(regionSelected.name);
+}
 
 /**
  * ------- onResize --------
@@ -376,6 +382,7 @@ $(document).ready(function(){
 	dispatch.on("load.map", mapBuild);
 	dispatch.on("load.coffee.fun", coffeeCompBuild);
 	dispatch.on("load.coffee.consume", coffeeConsumeBuild);
+	dispatch.on("regionChange.details", updateDetails);
 	
 	// Loading all data TODO: aggiungere progress bar?
 	queue()

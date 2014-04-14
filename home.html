@@ -3,16 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <link rel="stylesheet" type="text/css" href="css/style.css">
-<link href='http://fonts.googleapis.com/css?family=Fanwood+Text' rel='stylesheet' type='text/css'>
-<link href='http://fonts.googleapis.com/css?family=Cardo' rel='stylesheet' type='text/css'>
-<link href='http://fonts.googleapis.com/css?family=Raleway:100,400,200,300' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Fanwood+Text'
+	rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Cardo'
+	rel='stylesheet' type='text/css'>
+<link
+	href='http://fonts.googleapis.com/css?family=Raleway:100,400,200,300'
+	rel='stylesheet' type='text/css'>
 
 <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 <script src="http://d3js.org/topojson.v1.min.js"></script>
 <script src="http://d3js.org/queue.v1.min.js"></script>
 <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
 <!-- <script src="js/crossfilter.min.js"></script> -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.1/crossfilter.js"></script>
+<script
+	src="//cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.1/crossfilter.js"></script>
 <!-- <script src="js/sankey.js"></script> -->
 <script src="js/interactive3.js"></script>
 <script src="js/bullet.js"></script>
@@ -22,16 +27,20 @@
 
 <script type="text/javascript">
 <!--
-var feedList = true
-function toggleFeedList(){
-	feedList = !feedList;
-	var table = $("#table-wrapper");
-	var label = $("#button-showflist > span");
-	var opt = {duration:500, easing:"swing"};
+	var feedList = true
+	function toggleFeedList() {
+		feedList = !feedList;
+		var table = $("#table-wrapper");
+		var label = $("#button-showflist > span");
+		var opt = {
+			duration : 500,
+			easing : "swing"
+		};
 
-	feedList ? label.text( "Hide feedback list") : label.text( "Show feedback list");
-	table.slideToggle(opt);
-}
+		feedList ? label.text("Hide feedback list") : label
+				.text("Show feedback list");
+		table.slideToggle(opt);
+	}
 //-->
 </script>
 
@@ -39,88 +48,95 @@ function toggleFeedList(){
 </head>
 
 <body>
-	<header id="header">The filtered coffee survey</header>
 
 	<!-- Contenitore della visualizzazinoe interattiva -->
-	<section id="wrapper">
-	
+	<div id="wrapper">
+	<header id="header">The filtered coffee survey</header>
 		<!-- Contenitore degli elementi di dettaglio della regione selezionata -->
-		<div id="lside">
+		<div id="lside" class="inline">
 			<h1>Dettagli della regione</h1>
-			
-			<article id="region"> <!-- TODO: to article? -->
-				<h2 id="name" class="inline">Italia</h2>
-			</article>
-			
-			<article id="coffee">
-				<div id="composition" class="subsec">
-					<h3>Consumi di caffè</h3>
-					<div id="fan-chart" class="chart"></div>
-				</div>
-				
-				<div id="consumes" class="subsec">
-					<h3>Consumo percentuale</h3>
-					<div id="consume-chart" class="chart"></div>
-				</div>
-			</article>
-			
-			<article id="turist">
-				<div id="languages" class="subsec">
-					<h3>Composizione turisti</h3>
-					<div id="turist-chart" class="chart"></div>
-				</div>
-			</article>
-		</div>
-		
-		<div id="hotels">
-			<img class="ball inline" src="images/info.png" style="padding: 5px">
-			<h3 class="inline">Numero delle strutture presenti:</h3>
-			<div id="hotels-number" class="inline">NA</div>
-		</div>
-		
-		<!-- Rappresentazione della sentiment analysis con foucs sulla struttura selezionata -->
-		<div id="sentiment" style="opacity: 0; display: none;">
-			<h2>Statistiche: <span id="hotel-name">Generali</span></h2>
-			
-			<div class="inline">
-				<h3>Sentiment Analysis</h3>
-				<div id="feedback"></div>
+
+			<h2 id="region-name">Italia</h2>
+
+			<div id="composition">
+				<h3>Consumi di caffè</h3>
+				<div id="fan-chart" class="chart"></div>
 			</div>
-			
+
+			<div id="consumes">
+				<h3>Consumo percentuale</h3>
+				<div id="consume-chart" class="chart"></div>
+			</div>
+
+			<div id="turist">
+				<h3>Composizione turisti</h3>
+				<div id="turist-chart" class="chart"></div>
+			</div>
+		</div>
+
+		<div id="map-container" class="inline">
+			<!-- Contenitore della mappa geografica interattiva -->
+			<div id="map"></div>
+		</div>
+
+		<div id="hotel-container" class="inline">
+			<div id="hotels">
+				<img class="ball inline" src="images/info.png" style="padding: 5px">
+				<h3 class="inline">Numero delle strutture presenti:</h3>
+				<div id="hotels-number" class="inline">NA</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Rappresentazione della sentiment analysis con foucs sulla struttura selezionata -->
+	<div id="sentiment" style="opacity: 0; display: none;">
+		<h2>
+			Statistiche: <span id="hotel-name">Italia</span>
+		</h2>
+
+		<div>
+			<h3>Sentiment Analysis</h3>
+
+			<!-- Hotel rank -->
 			<div id="rank-wrapper" class="inline">
 				<p>Valutazione globale</p>
 				<div id="rank"></div>
 			</div>
-			
-			<div>
-				<h3 class="inline">Feedback trend</h3>
-				<div id="button-showflist" class="inline"><span onclick="toggleFeedList()" style="cursor: pointer; margin-left:50px">Hide feedback list</span></div>
-			</div>
-			
-			<div>
-			
-				<!-- Tabella dei feedback -->
-				<div id="table-wrapper" class="inline">
-					<div id="table-scroll">
-						<table id="feedback-table" class="table table-hover">
-							<thead>
-							</thead>
-							<tbody>
-							</tbody>
-						</table>
-					</div>
-				</div>
-				
-				<!-- Grafico dell'andamento delle valutazioni -->
-				<div id="trend-analysis" class="inline"></div>
-				
+
+			<!-- Sentiment analysis -->
+			<div class="inline">
+				<div id="feedback"></div>
 			</div>
 		</div>
-		
-		<!-- Contenitore della mappa geografica interattiva -->
-		<div id="map"></div>
-	</section>
-	
+
+		<div>
+			<div>
+				<h3 class="inline">Feedback trend</h3>
+				<div id="button-showflist" class="inline">
+					<span onclick="toggleFeedList()"
+						style="cursor: pointer; margin-left: 50px">Hide feedback
+						list</span>
+				</div>
+			</div>
+
+			<!-- Tabella dei feedback -->
+			<div id="table-wrapper" class="inline" style="display:none;">
+				<div id="table-scroll">
+					<table id="feedback-table" class="table table-hover">
+						<thead>
+						</thead>
+						<tbody>
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+			<!-- Grafico dell'andamento delle valutazioni -->
+			<div id="trend-analysis" class="inline"></div>
+
+		</div>
+	</div>
+
 	<footer id="footer"></footer>
 </body>
 </html>

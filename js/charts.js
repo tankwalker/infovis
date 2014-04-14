@@ -4,9 +4,9 @@ function barChart(div){
 	var chart = {};
 	
 	var width = 300,
-		height = 150,
+		height = 100,
 		margin = {left:10, top:0, right:0, bottom:0},
-		thickness = 20,
+		thickness = 8,
 		labelWidth = 80,
 		name = null,
 		data = [],
@@ -16,6 +16,9 @@ function barChart(div){
 		formatText = d3.format(""),
 		callback = function(d, c){ return; };
 	
+	pos = d3.scale.ordinal()
+		.domain([0, 10]);
+		
 	var svg = d3.select("#"+div).append("svg")
 		.attr("width", width)
 		.attr("height", height)
@@ -24,9 +27,6 @@ function barChart(div){
 	function setBoundaries() {
 		width = window.w * .25;
 		height = width / 3;
-
-		pos.rangeRoundBands([0, height], .8, .1);
-		bar.range([0, width - labelWidth - margin.left - margin.right]);
 
 		svg.attr("width", width)
 			.attr("height", height)
@@ -38,13 +38,16 @@ function barChart(div){
 		var labelData = svg.selectAll(".label").data(data);
 		var textData = svg.selectAll(".textbar").data(data);
 		
-		setBoundaries();
+		pos.domain(data.map(function(d){ return d.key; }))
+			.rangeRoundBands([0, height], .1, .2);
+		
+		bar.range([0, width]);
 		
 		// Build skeleton for current data
 		rectData.enter().append("rect")
 			.attr("class", "bar")
 			.attr("x", labelWidth)
-			.attr("y", function(d, i){return i * pos.rangeBand();})
+			.attr("y", function(d){return pos(d.key);})
 			.attr("width", 0)
 			.attr("height", thickness)
 			.on("mouseover", function(d){ callback(d.key, this); })
@@ -53,8 +56,8 @@ function barChart(div){
 		labelData.enter().append("text")
 			.attr("class", "label")
 			.attr("x", 0)
-			.attr("y", function(d, i){return i * pos.rangeBand();})
-			.attr("dy", 15)
+			.attr("y", function(d){return pos(d.key);})
+			.attr("dy", 10)
 			.style("fill", "white")
 			.style("font-weight", "bold")
 			.style("opacity", 0)
@@ -63,8 +66,8 @@ function barChart(div){
 		textData.enter().append("text")
 			.attr("class", "textbar")
 			.attr("x", 0)
-			.attr("y", function(d, i){return i * pos.rangeBand();})
-			.attr("dy", 15)
+			.attr("y", function(d){return pos(d.key);})
+			.attr("dy", 10)
 			.style("fill", "white")
 			.style("opacity", 0)
 			.style("font-weight", "bold");
@@ -92,8 +95,8 @@ function barChart(div){
 		
 		svg.selectAll(".bar").transition()
 			.duration(duration)
-			.attr("width", function(d){ return bar(d.value); })
-			.attr("fill", function(d, i){ return color(i); });
+			.attr("width", function(d){ return bar(d.value); });
+//			.attr("fill", function(d, i){ return color(i); });
 
 		svg.selectAll(".label").style("opacity", 1);
 
@@ -217,16 +220,238 @@ function barChart(div){
 	return chart;
 }
 
+function verticalBarChart(div){
+	var _id = id++;
+	var chart = {};
+	
+	var width = 256,
+		height = 120,
+		margin = {left:20, top:10, right:10, bottom:50},
+		thickness = 12,
+		name = null,
+		data = [],
+		bar = null,
+		pos = null,
+		color = null,
+		formatText = d3.format(""),
+		callback = function(d, c){ return; };
+	
+	pos = d3.scale.ordinal()
+		.domain([0, 10])
+		.rangeRoundBands([0, width], .1, .2);
+	
+	bar = d3.scale.linear()
+		.domain([0, 100]);
+	
+	var xAxis = d3.svg.axis()
+		.scale(pos)
+		.orient("bottom");
+	
+	var yAxis = d3.svg.axis()
+		.scale(bar)
+		.ticks(5)
+		.tickSize(-width)
+		.orient("left");
+	
+	var svg = d3.select("#"+div).append("svg")
+		.attr("width", width + margin.left + margin.right)
+		.attr("height", height + margin.top + margin.bottom)
+	.append("g")
+		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+	
+	var gxAxis = svg.append("g")
+		.attr("class", "x axis")
+		.attr("transform", "translate(0 , " + height + ")");
+	
+	var gyAxis = svg.append("g")
+		.attr("class", "y axis minor");
+	
+	chart.render = function(){
+		var rectData = svg.selectAll(".bar").data(data);
+		var labelData = svg.selectAll(".label").data(data);
+		var textData = svg.selectAll(".textbar").data(data);
+		
+		pos.domain(data.map(function(d){ return d.key; }));
+		bar.range([height, 0]);
+		
+		gxAxis.call(xAxis)
+			.selectAll("text")
+			.attr("transform", "rotate(-65)")
+			.attr("dx", "-5px")
+			.attr("dy", "-5px")
+			.style("text-anchor", "end");
+		
+		gyAxis.call(yAxis);
+		
+		// Build skeleton for current data
+		rectData.enter().append("rect")
+			.attr("class", "bar")
+			.attr("x", function(d){ return pos(d.key); })
+			.attr("y", 0)
+			.attr("width", thickness)
+			.attr("height", 0)
+			.on("mouseover", function(d){ callback(d.key, this); })
+			.on("mouseout", function(d){ callback(null, this); });
+
+		textData.enter().append("text")
+			.attr("class", "textbar")
+			.attr("x", function(d){ return pos(d.key); })
+			.attr("y", 0)
+			.attr("dy", 10)
+			.style("fill", "white")
+			//.style("opacity", 0)
+			.style("font-weight", "bold");
+		
+		rectData.exit().remove();
+		labelData.exit().remove();
+		textData.exit().remove();
+		
+		// Update values
+		if(!data || !data.length){
+			data = [];
+			
+			error = {name: "warning", message: "No data"};
+			console.warn(error.message);
+			return error;
+		}
+		
+		svg.selectAll(".bar").transition()
+			.duration(duration)
+			.attr("y", function(d){ return bar(d.value); })
+			.attr("height", function(d){ return height - bar(d.value); });
+//			.attr("fill", function(d, i){ return color(i); });
+
+		svg.selectAll(".textbar").transition()
+			.duration(duration)
+			.text(function(d){ return formatText(d.value); })
+			.attr("y", function(d){ return bar(d.value) - 20; })
+			.style("text-align", "center")
+			//.style("opacity", 1)
+			.style("fill", "#777");
+		
+	};
+	
+	/**
+	 * Set chart's data
+	 * @param _data an array of {key, value} pairs
+	 * @returns the data object if no arguments are provided, the chart otherwise
+	 */
+	chart.data = function(_data){
+		if(!arguments.length)
+			return data;
+		data = _data;
+		return chart;
+	};
+	
+	/**
+	 * Set chart's name
+	 * @param _bar An identifier for the chart
+	 * @returns the name if no arguments are provided, the chart otherwise
+	 */
+	chart.name = function(_name){
+		if(!arguments.length)
+			return name;
+		name = _name;
+		return chart;
+	};
+	
+	/**
+	 * Set horizontal scaler
+	 * @param _bar A d3.scale object
+	 * @returns d3.scale if no arguments are provided, the chart otherwise
+	 */
+	chart.bar = function(_bar){
+		if(!arguments.length)
+			return bar;
+		bar = _bar;
+		return chart;
+	};
+	
+	/**
+	 * Set vertical scaler
+	 * @param _bar A d3.scale object
+	 * @returns d3.scale if no arguments are provided, the chart otherwise
+	 */
+	chart.pos = function(_pos){
+		if(!arguments.length)
+			return pos;
+		pos = _pos;
+		return chart;
+	};
+	
+	/**
+	 * Set the thickness of the bars
+	 * @param _bar An integer value
+	 * @returns the actual thickness if no arguments are provided, the chart otherwise
+	 */
+	chart.thickness = function(_thickness){
+		if(!arguments.length)
+			return thickness;
+		thickness = _thickness;
+		return chart;
+	};
+	/**
+	 * Set the formatter for the text appearing after the values in the chart
+	 * @param _bar A d3.format object
+	 * @returns d3.format if no arguments are provided, the chart otherwise
+	 */
+	chart.formatText = function(_format){
+		if(!arguments.length)
+			return formatText;
+		formatText = _format;
+		return chart;
+	};
+	
+	/**
+	 * Set the formatter for the text appearing after the values in the chart
+	 * @param _bar A d3.color object
+	 * @returns d3.color if no arguments are provided, the chart otherwise
+	 */
+	chart.color = function(_color){
+		if(!arguments.length)
+			return color;
+		color = _color;
+		return chart;
+	};
+	
+	chart.id = function(){
+		return _id;
+	};
+	
+	chart.width = function(_width){
+		if(!arguments.length)
+			return width;
+		width = _width;
+		return chart;
+	};
+	
+	chart.height = function(_height){
+		if(!arguments.length)
+			return height;
+		height = _height;
+		return chart;
+	};
+	
+	chart.callback = function(_call){
+		if(!arguments.length)
+			return;
+		callback = _call;
+		return chart;
+	};
+	
+	return chart;
+}
+
 function bulletChart(divname){
 	var chart = {};
 	
-	var width = 80,
-		height = 250,
+	var width = 200,
+		height = 50,
 		margin = {top:30, right:10, bottom:10, left:10};
 	
 	var keys = ["flavour", "freshness", "temperature", "service"],
 		thickness = 20,
-		length = 250,
+		length = width,
 		vertical = false,
 		plotTick = true,
 		data = null,
@@ -241,8 +466,10 @@ function bulletChart(divname){
 		.enter().append("svg")
 			.attr("class", "bullet")
 			.attr("id", function(d){ return d; })
-			.attr("width", vertical ? width + margin.left + margin.right : 400)
-			.attr("height", vertical ? height + margin.top + margin.bottom: 80)
+//			.attr(!vertical ? "width" : "height", width + margin.left + margin.right)
+//			.attr(!vertical ? "heigth" : "width", height + margin.top + margin.bottom)
+			.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom)
 		.append("g")
 		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -382,14 +609,6 @@ function bulletChart(divname){
 		return chart;
 	};
 
-	chart.length = function(_length){
-		if(!arguments.length)
-			return length;
-		
-		length = _length;
-		return chart;
-	};
-	
 	chart.vertical = function(_bool){
 		if(!arguments.length)
 			return vertical;
@@ -403,6 +622,22 @@ function bulletChart(divname){
 			return plotTick;
 		
 		plotTick = _bool;
+		return chart;
+	};
+
+	chart.width = function(_){
+		if(!arguments.length)
+			return width;
+		
+		width = _;
+		return chart;
+	};
+
+	chart.heigth = function(_){
+		if(!arguments.length)
+			return heigth;
+		
+		heigth = _;
 		return chart;
 	};
 	
