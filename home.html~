@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" type="text/css" href="css/style.css">
+<link href='http://fonts.googleapis.com/css?family=Fanwood+Text' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Cardo' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Raleway:100,400,200,300' rel='stylesheet' type='text/css'>
+
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
+<script src="http://d3js.org/queue.v1.min.js"></script>
+<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script src="js/crossfilter.min.js"></script>
+<script src="js/sankey.js"></script>
+<script src="js/interactive.js"></script>
+<script src="js/bullet.js"></script>
+
+<title>Information Visualization Project</title>
+</head>
+
+<body>
+	<header id="header">The filtered coffee survey</header>
+
+	<!-- Contenitore della visualizzazinoe interattiva -->
+	<section id="wrapper">
+	
+		<!-- Contenitore degli elementi di dettaglio della regione selezionata -->
+		<div id="lside">
+			<h1>Dettagli della regione</h1>
+			
+			<article id="region"> <!-- TODO: to article? -->
+				<h2 id="name" class="inline">Italia</h2>
+			</article>
+			
+			<article id="coffee">
+				<div id="composition" class="subsec">
+					<h3>Consumi di caffè</h3>
+					<div id="fan-chart" class="chart"></div>
+				</div>
+				
+				<div id="consumes" class="subsec">
+					<h3>Consumo percentuale</h3>
+					<div id="consume-chart" class="chart"></div>
+				</div>
+			</article>
+			
+			<article id="turist">
+				<div id="languages" class="subsec">
+					<h3>Composizione turisti</h3>
+					<div id="turist-chart" class="chart"></div>
+				</div>
+			</article>
+		</div>
+		
+		<div id="hotels">
+			<img class="ball inline" src="images/info.png" style="padding: 5px">
+			<h3 class="inline">Numero delle strutture presenti</h3>
+			<div id="hotels-number" class="inline">12</div>
+		</div>
+		
+		<!-- Rappresentazione della sentiment analysis con foucs sulla struttura selezionata -->
+		<div id="sentiment">
+			<h3 style="display: inline-block">Feedback</h3>
+			<h3 id="hotel-name" style="display: inline-block"></h3>
+			<div id="feedback"></div>
+			<div id="rank"></div>
+		</div>
+		
+		<!-- Contenitore della mappa geografica interattiva -->
+		<div id="map"></div>
+	</section>
+	
+	<footer id="footer"></footer>
+</body>
+</html>
