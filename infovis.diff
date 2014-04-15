@@ -1,0 +1,626 @@
+diff --git a/css/style.css b/css/style.css
+index 2d9ca38..219427a 100644
+--- a/css/style.css
++++ b/css/style.css
+@@ -24,6 +24,12 @@
+ }
+ 
+ /*** Line chart ***/
++.area {
++	fill: #4a6150;/*rgb(74, 97, 80);*/
++	fill-opacity: .5;
++	stroke: none;
++}
++
+ .axis path,
+ .axis line {
+   fill: none;
+@@ -31,6 +37,11 @@
+   shape-rendering: crispEdges;
+ }
+ 
++#trend-analysis .axis line {
++	fill: none;
++	stroke-opacity: .125;
++}
++
+ .x.axis path {
+ 	
+ }
+@@ -42,14 +53,18 @@
+ 
+ .line {
+   fill: none;
+-  stroke: rgb(120, 199, 142);
+-  stroke-width: 1.5px;
++  stroke: #78c78e; /*rgb(120, 199, 142);*/
++  stroke-width: 2px;
+ }
+ 
+ .dot {
+ 	fill: rgb(80, 159, 102);
+ }
+ 
++.brush {
++	fill: #fff;
++	fill-opacity: .125;
++}
+ 
+ /***** HTML-CSS *****/
+ 
+@@ -279,4 +294,4 @@ th, th > span {
+ 	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+ 	font-size: 24px;
+ 	font-weight: bold;
+-}
+\ No newline at end of file
++}
+diff --git a/css/style.css~ b/css/style.css~
+index cbce13b..e1f9607 100644
+--- a/css/style.css~
++++ b/css/style.css~
+@@ -5,11 +5,8 @@
+ 	fill:none;
+ }
+ 
+-path {
+-	fill: gray;
+-}
+-
+ .region {
++	fill: gray;
+ 	stroke: black;
+ 	stroke-width: 0.5;
+ }
+@@ -26,6 +23,49 @@ path {
+ 	fill: #ccc;
+ }
+ 
++/*** Line chart ***/
++.area {
++	fill: #4a6150;/*rgb(74, 97, 80);*/
++	fill-opacity: .5;
++	stroke: none;
++}
++
++.axis path,
++.axis line {
++  fill: none;
++  stroke: #fff;
++  shape-rendering: crispEdges;
++}
++
++#trend-analysis .axis line {
++	fill: none;
++	stroke-opacity: .125;
++	stroke-width: .5px;
++}
++
++.x.axis path {
++	
++}
++
++.axis text {
++	fill: none;
++	stroke: #909090;
++}
++
++.line {
++  fill: none;
++  stroke: #78c78e; /*rgb(120, 199, 142);*/
++  stroke-width: 2px;
++}
++
++.dot {
++	fill: rgb(80, 159, 102);
++}
++
++.brush {
++	fill: #fff;
++	fill-opacity: .125;
++}
+ 
+ /***** HTML-CSS *****/
+ 
+@@ -48,19 +88,22 @@ header {
+ 	margin: 8px;
+ }
+ 
+-h1 {
++h1,
++h1 > * {
+ 	font-size: 20pt;
+ 	font-weight: 200;
+ }
+ 
+-h2 {
++h2,
++h2 > * {
+ 	color: #ffcc00;
+ 	font-size: 18pt;
+ 	font-weight: 200;
+ }
+ 
+-h3 {
+-	
++h3,
++h3 > * {
++	font-weight: 300;
+ }
+ 
+ /* Classes */
+@@ -83,12 +126,13 @@ h3 {
+ .bullet .title { font-size: 14px; font-weight: bold; fill: #fff;}
+ .bullet .subtitle { fill: #eee; }
+ 
+-.bar {
+-	fill: #ffffff;
++.bar.over {
++	fill: orange;
+ }
+ 
+ .inline {
+ 	display: inline-block;
++	/* margin-left: 5px; */
+ }
+ 
+ .entry {
+@@ -105,6 +149,11 @@ h3 {
+     background-color: rgba(255, 255, 255, .4);
+ }
+ 
++.entry.active {
++    /* background-color: rgba(250, 120, 46, .4); */
++    background-color: orange;
++}
++
+ .section {
+ 	/*background-color: rgba(71,71,71,0.8);*/
+ }
+@@ -142,9 +191,13 @@ h3 {
+ 
+ #hotels {
+ 	min-width: 400px;
+-	position: absolute;
+-	top: 50px;
++	max-height: 260px;
++/* 	position: absolute;
++	top: 50px; */
+ 	right: 10px;
++	overflow: auto;
++	position: fixed;
++	top: 50px;
+ }
+ 
+ #map {
+@@ -160,4 +213,86 @@ h3 {
+ 	right: 10px;*/
+ 	padding: 10px;
+ 	background: rgba(0, 0, 0, .3);
++	z-index: -10;
++}
++
++#rank-wrapper {
++	font-weight: 200;
++	background-color: #333;
++	padding: 10px 40px 10px 40px;
++	border-radius: 15px;
++	text-align: center;
++}
++
++/*** Feedback table ***/
++#table-wrapper {
++  position: relative;
++  width: 50%;
++  margin-right: 10px;
++}
++
++#table-scroll {
++  height: 300px;
++  overflow: auto;  
++  margin-top: 20px;
++}
++
++#table-wrapper table thead th > span {
++  position: absolute;   
++  top: -20px;
++}
++
++table {
++  max-width: 100%;
++  background-color: transparent;
++}
++th, th > span {
++  text-align: left;
++  font-weight: bold;
++}
++.table {
++  width: 100%;
++  margin-bottom: 20px;
++}
++.table > thead > tr > th,
++.table > tbody > tr > th,
++.table > tfoot > tr > th,
++.table > thead > tr > td,
++.table > tbody > tr > td,
++.table > tfoot > tr > td {
++  padding: 8px;
++  line-height: 1.42857143;
++  vertical-align: top;
++  border-top: 1px solid #ddd;
++}
++.table > thead > tr > th {
++  vertical-align: bottom;
++  border-bottom: 2px solid #ddd;
++}
++
++.table-hover > tbody > tr:hover > td,
++.table-hover > tbody > tr:hover > th {
++  background-color: #555;
++}
++
++
++/*** Trend analysis ***/
++#trend-analysis {
++	color: white;
++	margin-left: 10px;
++}
++
++/*** Rank chart ***/
++.progress-meter .background {
++	fill: #ccc;
++}
++
++.progress-meter .foreground {
++	fill: #334455;
++}
++
++.progress-meter text {
++	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
++	font-size: 24px;
++	font-weight: bold;
+ }
+diff --git a/home.html b/home.html
+index 14f1574..26119ca 100644
+--- a/home.html
++++ b/home.html
+@@ -18,7 +18,6 @@
+ <script src="js/bullet.js"></script>
+ <script src="js/charts.js"></script>
+ <script src="js/feedback.js"></script>
+-<script src="js/jquery.sticky.js"></script>
+ 
+ <script type="text/javascript">
+ <!--
+diff --git a/home.html~ b/home.html~
+index 355d1ff..14f1574 100644
+--- a/home.html~
++++ b/home.html~
+@@ -11,10 +11,29 @@
+ <script src="http://d3js.org/topojson.v1.min.js"></script>
+ <script src="http://d3js.org/queue.v1.min.js"></script>
+ <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+-<script src="js/crossfilter.min.js"></script>
+-<script src="js/sankey.js"></script>
+-<script src="js/interactive.js"></script>
++<!-- <script src="js/crossfilter.min.js"></script> -->
++<script src="//cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.1/crossfilter.js"></script>
++<!-- <script src="js/sankey.js"></script> -->
++<script src="js/interactive3.js"></script>
+ <script src="js/bullet.js"></script>
++<script src="js/charts.js"></script>
++<script src="js/feedback.js"></script>
++<script src="js/jquery.sticky.js"></script>
++
++<script type="text/javascript">
++<!--
++var feedList = true
++function toggleFeedList(){
++	feedList = !feedList;
++	var table = $("#table-wrapper");
++	var label = $("#button-showflist > span");
++	var opt = {duration:500, easing:"swing"};
++
++	feedList ? label.text( "Hide feedback list") : label.text( "Show feedback list");
++	table.slideToggle(opt);
++}
++//-->
++</script>
+ 
+ <title>Information Visualization Project</title>
+ </head>
+@@ -55,16 +74,47 @@
+ 		
+ 		<div id="hotels">
+ 			<img class="ball inline" src="images/info.png" style="padding: 5px">
+-			<h3 class="inline">Numero delle strutture presenti</h3>
+-			<div id="hotels-number" class="inline">12</div>
++			<h3 class="inline">Numero delle strutture presenti:</h3>
++			<div id="hotels-number" class="inline">NA</div>
+ 		</div>
+ 		
+ 		<!-- Rappresentazione della sentiment analysis con foucs sulla struttura selezionata -->
+-		<div id="sentiment">
+-			<h3 style="display: inline-block">Feedback</h3>
+-			<h3 id="hotel-name" style="display: inline-block"></h3>
+-			<div id="feedback"></div>
+-			<div id="rank"></div>
++		<div id="sentiment" style="opacity: 0; display: none;">
++			<h2>Statistiche: <span id="hotel-name">Generali</span></h2>
++			
++			<div class="inline">
++				<h3>Sentiment Analysis</h3>
++				<div id="feedback"></div>
++			</div>
++			
++			<div id="rank-wrapper" class="inline">
++				<p>Valutazione globale</p>
++				<div id="rank"></div>
++			</div>
++			
++			<div>
++				<h3 class="inline">Feedback trend</h3>
++				<div id="button-showflist" class="inline"><span onclick="toggleFeedList()" style="cursor: pointer; margin-left:50px">Hide feedback list</span></div>
++			</div>
++			
++			<div>
++			
++				<!-- Tabella dei feedback -->
++				<div id="table-wrapper" class="inline">
++					<div id="table-scroll">
++						<table id="feedback-table" class="table table-hover">
++							<thead>
++							</thead>
++							<tbody>
++							</tbody>
++						</table>
++					</div>
++				</div>
++				
++				<!-- Grafico dell'andamento delle valutazioni -->
++				<div id="trend-analysis" class="inline"></div>
++				
++			</div>
+ 		</div>
+ 		
+ 		<!-- Contenitore della mappa geografica interattiva -->
+diff --git a/js/charts.js b/js/charts.js
+index 0adfb64..00015fa 100644
+--- a/js/charts.js
++++ b/js/charts.js
+@@ -436,7 +436,9 @@ function lineChart(divName){
+ 		.orient("bottom")
+ 		.ticks(d3.time.month, 3)
+ 		.tickFormat(d3.time.format("%b %Y"))
+-		.tickPadding(8);
++		.tickPadding(8)
++		.tickSize(-height)
++		.tickSubdivide(true);
+ 
+ 	var yAxis = d3.svg.axis()
+ 		.scale(y)
+@@ -453,41 +455,97 @@ function lineChart(divName){
+ 		.x(function(d){ return x(getX(d)); })
+ 		.y(function(d){ return y(getY(d)); });
+ 	
+-	var maker = svg.append("line")
+-		.attr("class", "marker");
++	var area = d3.svg.area()
++		.interpolate("cardinal")
++		.x(function(d){ return x(getX(d)); })
++		.y0(height)
++		.y1(function(d){ return y(getY(d)); });
+ 	
+-	function initAxis(){
+-//		x.domain(d3.extent(data, getX));
+-		x.domain([d3.time.year.offset(new Date(), -2), new Date()]);
+-		y.domain([0, 5]);
++	
++	/**********************************************/
++	brush = d3.svg.brush()	
++		.x(x)
++		.on("brushend", brushend);
++	
++	var brushFilter = null;
++	
++	function brushend() {
++		if(!d3.event.sourceEvent) return;
+ 		
+-		// Build skeleton
+-		svg.append("g")
+-			.attr("class", "x axis")
+-			.attr("transform", "translate(0," + height + ")")
+-			.call(xAxis)
+-			.append("text")
+-			.data(xAxisLabel)
+-			.attr("y", 6)
+-			.attr("dy", ".71em")
+-			.style("text-anchor", "end")
+-			.text(function(d){ return d; });
+-
+-		svg.append("g")
+-			.attr("class", "y axis")
+-			.call(yAxis)
+-			.append("text")
+-			.data(yAxisLabel)
+-	//		.attr("transform", "rotate(-90)")
+-			.attr("y", 6)
+-			.attr("dy", ".71em")
+-			.style("text-anchor", "end")
+-			.text(function(d){ return d; });
++		if(brush.empty())
++			brush.clear();
+ 		
+-		svg.append("path")
+-			.attr("class", "line");
++		var rawExtent = brush.extent(),
++			extent = rawExtent.map(d3.time.month.round);
+ 		
++		console.log(extent);
++		
++		d3.select(this).transition()
++			.duration(duration)
++			.call(brush.extent(extent))
++			.call(brush.event);
++		
++		// update filtering if enabled
++		if(brushFilter){
++			brushFilter(extent);
++		}
+ 	}
++	/**********************************************/
++	
++//		x.domain(d3.extent(data, getX));
++	x.domain([d3.time.year.offset(new Date(), -2), new Date()]);
++	y.domain([0, 5]);
++	
++	// Build skeleton
++	// x axis
++	svg.append("g")
++		.attr("class", "x axis")
++		.attr("transform", "translate(0," + height + ")")
++		.call(xAxis)
++		.append("text")
++		.data(xAxisLabel)
++		.attr("y", 6)
++		.attr("dy", ".71em")
++		.style("text-anchor", "end")
++		.text(function(d){ return d; });
++
++	// y axis
++	svg.append("g")
++		.attr("class", "y axis")
++		.call(yAxis)
++		.append("text")
++		.data(yAxisLabel)
++//		.attr("transform", "rotate(-90)")
++		.attr("y", 6)
++		.attr("dy", ".71em")
++		.style("text-anchor", "end")
++		.text(function(d){ return d; });
++	
++	// area
++	svg.append("path")
++		.attr("class", "area");
++	
++	// line
++	svg.append("path")
++		.attr("class", "line");
++	
++	// markers
++	var dots = svg.append("g")
++		.attr("class", "markers");
++	
++	// line marker position
++	var maker = svg.append("line")
++		.attr("class", "marker");
++	
++	// brush selector
++	var gBrush = svg.append("g")
++		.attr("class", "brush")
++		.call(brush)
++		.call(brush.event);
++	
++	gBrush.selectAll("rect")
++		.attr("height", height);
++	
+ 	
+ 	chart.render = function(){
+ 		// Update data
+@@ -497,21 +555,26 @@ function lineChart(divName){
+ 			return error;
+ 		}
+ 		
++		// line
+ 		svg.select(".line").datum(data)
+ //			.transition()
+ //			.duration(duration)
+ 			.attr("d", line);
+-
+-		var dots = svg.selectAll(".dot").data(data, function(d){ return getY(d)*7+getX(d); });	//TODO: trova chiave migliore
+ 		
+-		dots.enter().append("circle")
++		
++		// markers
++		dots.selectAll(".dot").remove();
++		dots.selectAll(".dot").data(data)
++			.enter().append("circle")
+ 			.attr("class", "dot")
+-			.attr("r", 3.5)
++			.attr("r", 3)
+ 			.attr("cx", function(d) { return x(getX(d)); })
+ 			.attr("cy", function(d) { return y(getY(d)); });
+ 
+-		dots.exit().remove();
+-		
++		// area
++		svg.select(".area").datum(data)
++			.attr("d", area);
++			
+ 		return chart;
+ 	};
+ 	
+@@ -645,7 +708,12 @@ function lineChart(divName){
+ 		return chart;
+ 	};
+ 	
+-	initAxis();
++	chart.filter = function(_bfilter){
++		if(!arguments.length)
++			return brushFilter;
++		brushFilter = _bfilter;
++		return chart;
++	}
+ 	
+ 	return chart;
+ }
+@@ -750,4 +818,4 @@ function rankChart(divName){
+ 	};
+ 	
+ 	return chart;
+-}
+\ No newline at end of file
++}
+diff --git a/js/feedback.js b/js/feedback.js
+index 918e18b..88289df 100644
+--- a/js/feedback.js
++++ b/js/feedback.js
+@@ -255,7 +255,8 @@ function feedback(data){
+ 	
+ 	var trend = lineChart(trendDiv)
+ 		.x(function(d){ return d.key; })
+-		.y(function(d){ return d.value.rank; });
++		.y(function(d){ return d.value.rank; })
++		.filter(function(e){ fb.dateFilter(e).renderAll(); });
+ 	
+ 	var formatDate = d3.time.format("%Y-%m-%d %H:%M:%S");
+ 	var formatFloat = d3.format(".2r");
+@@ -466,8 +467,14 @@ function feedback(data){
+ 		return fb;
+ 	};
+ 	
+-	fb.dateFilter = function(start, end){
+-		feedbackByDate.filterRange([start, end]);
++	fb.dateFilter = function(e1, e2){
++		if(arguments.length > 1)
++			extent = [e1, e2];
++		else
++			extent = e1;
++			
++		feedbackByDate.filterRange(extent);
++		console.log(extent);
+ 		return fb;
+ 	};
+ 	
+@@ -540,8 +547,8 @@ function feedback(data){
+ 		fb.renderAll();
+ 	}
+ 	
+-	fb.dateFilter(d3.time.year.offset(new Date(), -2), new Date());		//FIXME: da integrare
++	fb.dateFilter([d3.time.year.offset(new Date(), -2), new Date()]);		//FIXME: da integrare
+ //	dispatch.on("regionChange.feedback", regionChange);
+ 	
+ 	return fb;
+-}
+\ No newline at end of file
++}

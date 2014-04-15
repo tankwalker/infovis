@@ -260,12 +260,12 @@ function feedback(data){
 	
 	var trend = lineChart(trendDiv)
 		.x(function(d){ return d.key; })
-		.y(function(d){ return d.value.rank; });
+		.y(function(d){ return d.value.rank; })
+		.filter(function(e){ fb.filterDate(e).renderAll(); });
 	
 	var formatDate = d3.time.format("%Y-%m-%d %H:%M:%S");
 
 	var rank = rankChart("rank");
-
 	
 	// Parses records to cast fields
 	data.forEach(function(d){
@@ -470,8 +470,12 @@ function feedback(data){
 		return fb;
 	};
 	
-	fb.dateFilter = function(start, end){
-		feedbackByDate.filterRange([start, end]);
+	fb.filterDate = function(extent){
+		if(!extent)
+			feedbackByDate.filterAll();
+		else
+			feedbackByDate.filterRange(extent);
+		
 		return fb;
 	};
 	
@@ -542,7 +546,7 @@ function feedback(data){
 		fb.renderAll();
 	}
 	
-	fb.dateFilter(d3.time.year.offset(new Date(), -2), new Date());		//FIXME: da integrare con slider
+	fb.filterDate([d3.time.year.offset(new Date(), -2), new Date()]);		//FIXME: da integrare
 //	dispatch.on("regionChange.feedback", regionChange);
 	
 	return fb;

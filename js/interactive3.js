@@ -26,7 +26,7 @@ window.w = $(window).width();
 window.h = $(window).height();
 
 var detailDim = {ratio:0.2, min:256, max:500};	// Min, max Width and ratio of the details section relative to the window's one
-var mapDim = {ratio:0.45, min:200, max:800};		// Min, max Width and ratio of the map section relative to the window's one
+var mapDim = {ratio:0.45, min:320, max:800};		// Min, max Width and ratio of the map section relative to the window's one
 
 var duration = 350;				// Duration of transitions
 var barThickness = 20;			// Thickness of the bars in each bar chart
@@ -45,8 +45,8 @@ String.prototype.capitalize = function() {
  * Builds main map which allow to select regions
  */
 function mapBuild(){
-	var width = window.w * mapDim.ratio,
-		height = width * 3/4;				// 4:3 screen ratio
+	var width = 350,
+		height = width;
 
 	var projection = d3.geo.albers()
 		.center([0, 42])
@@ -242,7 +242,7 @@ function mapBuild(){
 		drawMap();
 	};
 	
-	dispatch.on("resize.map", resize);
+//	dispatch.on("resize.map", resize);
 }
 
 /**
@@ -274,6 +274,7 @@ function coffeeCompBuild(){
 	
 	function stateChange(region){
 		var data = d3.entries(coffeeByRegion.filter(region).top(1)[0]).filter(function(d){ return d.key !== "region"; });
+		
 		chart.data(data)
 			.render();
 	}
@@ -303,7 +304,7 @@ function coffeeConsumeBuild(){
 	var coffeeTotal = coffeeByRegion.group();
 	
 	var bar = d3.scale.linear()
-		.domain([0, 1000]);
+		.domain([0, 1]);
 	
 	var color = d3.scale.linear()
 		.range(["#4c2511", "#cc6600"])
@@ -320,8 +321,11 @@ function coffeeConsumeBuild(){
 	
 	function stateChange(region){
 		var data = d3.entries(coffeeByRegion.filter(region).top(1)[0]).filter(function(d){ return d.key !== "region"; });
-		data.forEach(function(d){ d.value = +d.value / 100; });
-		console.log(data);
+		var total = 0;
+		
+		data.forEach(function(d){ total += +d.value; });
+		data.forEach(function(d){ d.value /= total; });
+		
 		chart.data(data)
 			.render();
 	}
