@@ -1,0 +1,65 @@
+	list.render = function(){
+	
+	.map(function(d){ return {nome: d.key, rank:d.value.rank}; })
+				.filter(function(d){ return d.rank != 0; })
+		// Retrieve only the hotel whose value is != 0, so they belong to selected region
+		var hotelInRegion = data.filter(function(d){ return d.value.count; });
+		
+		var entry = div.selectAll(".entry").data(hotelInRegion, function(d){ return d.key; });
+		
+		y.domain(hotelInRegion.map(function(d){ return d.key; }));
+		
+		// Adds new hotel names into the list belonging to the chosen region
+		var svg = entry.enter().append("div").append("svg")
+			.attr("width", width)
+			.attr("height", thickness)
+		
+		var g = svg.append("g")
+			.attr("class", "entry")
+			.on("mouseover", function(d){
+				if(!selected){
+					updateCallback({name: d.key, rank:d.value.rank}, this);
+					hotelNameDiv.text(d.key);
+				}
+			})
+			.on("mouseout", function(d){
+				if(!selected){
+					updateCallback({name: null, rank:0}, this);
+					hotelNameDiv.text("Italia");
+				}
+			})
+			.on("click", function(d){
+				clicked({name: d.key, rank:d.value.rank}, this);
+				hotelNameDiv.text(d.key);
+			});
+		
+		g.append("rect")
+			.attr("class", "background")
+			.attr("width", width)
+			.attr("height", 30)
+			.attr("x", 0);
+		
+		g.append("rect")
+			.attr("class", "rank")
+			.attr("width", function(d){ return x(d.value.rank); })
+			.attr("height", 30)
+			.attr("x", 0);
+			
+		g.append("text")
+			.attr("x", 5)
+			.attr("dy", "20")
+			.text(function(d){ return d.key.capitalize(); });
+			
+		/*g.append("text")
+			.attr("x", width-10)
+			.attr("y", function(d, i){ return thickness * i; })
+			.attr("dy", "20")
+			.style("text-anchor", "end")
+			.style("stroke", "black")
+			.text(function(d){ return format(d.value.rank); });*/
+		
+		countDiv.text(hotelInRegion.length);
+		
+		// And removes the old one that do not belong to the selected region
+		entry.exit().remove();
+	};

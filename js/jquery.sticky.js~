@@ -52,11 +52,19 @@
             newTop = s.topSpacing;
           }
           
+          var newRight = documentHeight - s.stickyElement.outerHeight()
+            - s.rightSpacing - s.bottomSpacing - scrollTop - extra;
+          if (newRight < 0) {
+            newRight = newRight + s.rightSpacing;
+          } else {
+            newRight = s.rightSpacing;
+          }
+          
           if (s.currentTop != newTop) {
             s.stickyElement
               .css('position', 'fixed')
               .css('top', newTop)
-              .css('right', s.rightSpacing);
+              .css('right', newRight);
 
             if (typeof s.getWidthFrom !== 'undefined') {
               s.stickyElement.css('width', $(s.getWidthFrom).width());

@@ -17,7 +17,7 @@ function barChart(div){
 		callback = function(d, c){ return; };
 	
 	pos = d3.scale.ordinal()
-		.domain([0, 10]);
+		.rangeRoundBands([0, height], .1, .2);
 		
 	var svg = d3.select("#"+div).append("svg")
 		.attr("width", width)
@@ -38,8 +38,7 @@ function barChart(div){
 		var labelData = svg.selectAll(".label").data(data);
 		var textData = svg.selectAll(".textbar").data(data);
 		
-		pos.domain(data.map(function(d){ return d.key; }))
-			.rangeRoundBands([0, height], .1, .2);
+		pos.domain(data.map(function(d){ return d.key; }));
 		
 		bar.range([0, width]);
 		
@@ -445,8 +444,8 @@ function verticalBarChart(div){
 function bulletChart(divname){
 	var chart = {};
 	
-	var width = 200,
-		height = 50,
+	var width = 150,
+		height = 30,
 		margin = {top:30, right:10, bottom:10, left:10};
 	
 	var keys = ["flavour", "freshness", "temperature", "service"],
@@ -647,8 +646,8 @@ function bulletChart(divname){
 function lineChart(divName){
 	var chart = {};
 	
-	var width = 800,
-		height = 300,
+	var width = 670,
+		height = 220,
 		margin = {left:40, top:25, right:40, bottom:25},
 		thickness = 1.5,
 		name = null,
@@ -777,7 +776,7 @@ function lineChart(divName){
 	gBrush.selectAll(".resize").append("rect")
 		.attr("transform", "translate(-5," +  (height - 80) / 2 + ")")
 		.attr("width", 10)
-		.attr("height", 80)
+		.attr("height", 80);
 	
 	
 	chart.render = function(){
@@ -956,7 +955,7 @@ function rankChart(divName){
 	var width = 120,
 		height = 80,
 		pi = Math.PI,
-		radius = Math.min(width, height) / 2,
+		radius = 50,
 		data = 0;
 	
 	var empty = -pi / 2,

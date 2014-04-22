@@ -8,7 +8,11 @@
  * ============================================
  */
 
+<<<<<<< HEAD
 function feedbackList(){
+=======
+function tableChart(divname){
+>>>>>>> 9337ab6254a9cbf155b9ed509c4a85ebfb3735c3
 	var feedlist = {};
 	
 	var numberFormat = d3.format(".2r"),
@@ -17,7 +21,11 @@ function feedbackList(){
 	var data = [],
 		keys = [];
 	
+<<<<<<< HEAD
 	var table = d3.select("#feedback-table");
+=======
+	var table = d3.select("#" + divname);
+>>>>>>> 9337ab6254a9cbf155b9ed509c4a85ebfb3735c3
 	
 	feedlist.keys = function(_keys)	{
 		if(!arguments.length)
@@ -77,15 +85,40 @@ function hotelList(){
 	var width = 200,
 		height = 400,
 		margin = {left:10, top:10, right:10, bottom:10};
+<<<<<<< HEAD
+=======
+		
+	var headers = ["nome", "rank", "feeds"];
+	var tabname = "hotel-table";
+	
+	var table = tableChart(tabname).keys(headers);
+>>>>>>> 9337ab6254a9cbf155b9ed509c4a85ebfb3735c3
 	
 	var limit = 50,
 		dimension = null,
 		group = null,
 		data = [],
 		updateCallback = null,
+<<<<<<< HEAD
 		selected = false;
 	
 	var svg = d3.select("#hotels").append("div");
+=======
+		selected = false,
+		thickness = 40;
+	
+	var x = d3.scale.linear()
+		.domain([0, 5])
+		.range([0, width]);
+	
+	var y = d3.scale.ordinal()
+		.rangeRoundBands([0, height], .5);
+	
+	var div = d3.select("#hotels").append("div");
+	
+	var format = d3.format(".2r")
+	
+>>>>>>> 9337ab6254a9cbf155b9ed509c4a85ebfb3735c3
 	var countDiv = d3.select("#hotels-number");
 	var hotelNameDiv = d3.select("#hotel-name");
 	
@@ -105,6 +138,7 @@ function hotelList(){
 	
 	list.render = function(){
 		// Retrieve only the hotel whose value is != 0, so they belong to selected region
+<<<<<<< HEAD
 		var hotelInRegion = data.filter(function(d){ return d.value.count; });
 		
 		var entry = svg.selectAll(".entry").data(hotelInRegion, function(d){ return d.key; });
@@ -129,10 +163,40 @@ function hotelList(){
 		
 		// And removes the old one that do not belong to the selected region
 		entry.exit().remove();
+=======
+		var hotelInRegion = data.filter(function(d){ return d.value.count; })
+			.map(function(d){ return {nome: d.key, rank:d.value.rank, feeds:d.value.count}; });
+		
+		table.data(hotelInRegion).render();
+		
+		var entry = d3.select("#"+tabname).selectAll("tr");
+		
+		entry
+			.on("mouseover", function(d){
+				if(!selected){
+					console.log(d);
+					updateCallback({name: d[0].value, rank: d[1].value}, this);
+					hotelNameDiv.text(d[0].value);
+				}
+			})
+			.on("mouseout", function(d){
+				if(!selected){
+					updateCallback({name: null, rank:0}, this);
+					hotelNameDiv.text("Regione");
+				}
+			})
+			.on("click", function(d){
+				clicked({name: d[0].value, rank: d[1].value}, this);
+				hotelNameDiv.text(d[0].value);
+			});
+		
+		countDiv.text(hotelInRegion.length);
+>>>>>>> 9337ab6254a9cbf155b9ed509c4a85ebfb3735c3
 	};
 	
 	list.show = function(visible){
 		if(visible){
+<<<<<<< HEAD
 			svg.transition()
 			.duration(100)
 			.style("opacity", 1)
@@ -145,6 +209,20 @@ function hotelList(){
 			.style("opacity", 0)
 			.each("end", function(){
 				svg.style("display", "none");
+=======
+			div.transition()
+			.duration(100)
+			.style("opacity", 1)
+			.each("start", function(){
+				div.style("display", "block");
+			});
+		} else {
+			div.transition()
+			.duration(100)
+			.style("opacity", 0)
+			.each("end", function(){
+				div.style("display", "none");
+>>>>>>> 9337ab6254a9cbf155b9ed509c4a85ebfb3735c3
 			});
 		}
 		
@@ -235,11 +313,16 @@ function feedback(data){
 	var hotels = hotelList()
 		.update(hotelChange);
 	
+<<<<<<< HEAD
 	var turistChart = barChart(turistDiv)
 		.bar(d3.scale.linear()
 			.domain([0, 100]))
 		.pos(d3.scale.ordinal()
 			.domain([0, 10]))
+=======
+	var turistChart = verticalBarChart(turistDiv)
+		.height(100).width(256)
+>>>>>>> 9337ab6254a9cbf155b9ed509c4a85ebfb3735c3
 		.color(d3.scale.linear()
 			.range(["#6685e0", "#001a4c"])
 			.domain([0, 10]))
@@ -249,13 +332,23 @@ function feedback(data){
 			fb.filterCountry(d).renderAll();
 		});
 	
+<<<<<<< HEAD
 	var sentiment = bulletChart(sentimentDiv);
 	
 	var feedList = feedbackList(feedListDiv).keys(tableHeaders);
+=======
+	var sentiment = bulletChart(sentimentDiv)
+		.thickness(15)
+		.width(200)
+		.heigth(50);
+	
+	var feedList = tableChart(feedListDiv).keys(tableHeaders);
+>>>>>>> 9337ab6254a9cbf155b9ed509c4a85ebfb3735c3
 	
 	var trend = lineChart(trendDiv)
 		.x(function(d){ return d.key; })
 		.y(function(d){ return d.value.rank; })
+<<<<<<< HEAD
 		.filter(function(e){ fb.dateFilter(e); });
 	
 	var formatDate = d3.time.format("%Y-%m-%d %H:%M:%S");
@@ -264,6 +357,13 @@ function feedback(data){
 //	var rank = d3.select("#rank");
 	var rank = rankChart("rank");
 
+=======
+		.filter(function(e){ fb.filterDate(e).renderAll(); });
+	
+	var formatDate = d3.time.format("%Y-%m-%d %H:%M:%S");
+
+	var rank = rankChart("rank");
+>>>>>>> 9337ab6254a9cbf155b9ed509c4a85ebfb3735c3
 	
 	// Parses records to cast fields
 	data.forEach(function(d){
@@ -310,6 +410,10 @@ function feedback(data){
 	groupByHotel.reduce(reduceToRankAdd, reduceToRankRemove, reduceToRankInit).order(function(p){ return p.rank; });
 	groupByCountry.reduceCount();
 	groupByDate.reduce(reduceToRankAdd, reduceToRankRemove, reduceToRankInit).order(function(p){ return +p.key; });
+<<<<<<< HEAD
+=======
+	regionRank = feedbackByHotelFilter.groupAll().reduce(reduceToRankAdd, reduceToRankRemove, reduceToRankInit);
+>>>>>>> 9337ab6254a9cbf155b9ed509c4a85ebfb3735c3
 	
 	/* ---- reduce functions ----*/
 	function reduceToRankAdd(p, v){
@@ -359,7 +463,11 @@ function feedback(data){
 			var r = p[key].bullet.ranges;
 			var a = +v[key];
 			
+<<<<<<< HEAD
 			m[0] = (p.count * m[0]) - a/ --p[key].count;	// mean
+=======
+			m[0] = (p.count * m[0]) - a / --p[key].count;	// mean
+>>>>>>> 9337ab6254a9cbf155b9ed509c4a85ebfb3735c3
 			if(r[0] > a || !r[0]) r[0] = a;					// min
 			if(r[1] < a) r[1] = a;							// max
 		});
@@ -414,6 +522,7 @@ function feedback(data){
 		return bullets;
 	}
 	
+<<<<<<< HEAD
 	/*function sentimentBullets2(){
 		var bRegion,
 			bHotel;
@@ -432,6 +541,8 @@ function feedback(data){
 //		return groupByHotel.reduce(reduceToRankAdd, null, reduceToRankInit).all();
 //	}
 	
+=======
+>>>>>>> 9337ab6254a9cbf155b9ed509c4a85ebfb3735c3
 	fb.keys = function(_keys){
 		if(!arguments.length)
 			return keys;
@@ -467,6 +578,7 @@ function feedback(data){
 		return fb;
 	};
 	
+<<<<<<< HEAD
 	fb.dateFilter = function(e1, e2){
 		if(arguments.length > 1)
 			extent = [e1, e2];
@@ -475,6 +587,14 @@ function feedback(data){
 			
 		feedbackByDate.filterRange(extent);
 		console.log(extent);
+=======
+	fb.filterDate = function(extent){
+		if(!extent)
+			feedbackByDate.filterAll();
+		else
+			feedbackByDate.filterRange(extent);
+		
+>>>>>>> 9337ab6254a9cbf155b9ed509c4a85ebfb3735c3
 		return fb;
 	};
 	
@@ -498,23 +618,36 @@ function feedback(data){
 					.sort(function(a, b){ return a.key.getTime() - b.key.getTime(); }))
 			.render();
 		
+<<<<<<< HEAD
+=======
+		rank.data(regionRank.value().rank)
+			.render();
+		
+>>>>>>> 9337ab6254a9cbf155b9ed509c4a85ebfb3735c3
 		return fb;
 	};
 	
 	fb.renderHList = function(){
 		hotels
 			.data(groupByHotel.all())
+<<<<<<< HEAD
 			.show(true)
+=======
+//			.show(true)
+>>>>>>> 9337ab6254a9cbf155b9ed509c4a85ebfb3735c3
 			.render();
 		return fb;
 	};
 	
 	fb.renderHotelRank = function(r){
+<<<<<<< HEAD
 		
 //		rank.data([r])
 //			.transition()
 //			.duration(duration)
 //			.text(function(d){ return formatFloat(d); });
+=======
+>>>>>>> 9337ab6254a9cbf155b9ed509c4a85ebfb3735c3
 		rank.data(r).render();
 	};
 	
@@ -527,8 +660,13 @@ function feedback(data){
 				div.style("display", _bool ? "block" : "none");
 		});
 		
+<<<<<<< HEAD
 		hotels.clearSelection();
 		hotels.show(_bool);
+=======
+//		hotels.clearSelection();
+//		hotels.show(_bool);
+>>>>>>> 9337ab6254a9cbf155b9ed509c4a85ebfb3735c3
 		return fb;
 	};
 	
@@ -547,7 +685,11 @@ function feedback(data){
 		fb.renderAll();
 	}
 	
+<<<<<<< HEAD
 	fb.dateFilter([d3.time.year.offset(new Date(), -2), new Date()]);		//FIXME: da integrare
+=======
+	fb.filterDate([d3.time.year.offset(new Date(), -2), new Date()]);		//FIXME: da integrare
+>>>>>>> 9337ab6254a9cbf155b9ed509c4a85ebfb3735c3
 //	dispatch.on("regionChange.feedback", regionChange);
 	
 	return fb;

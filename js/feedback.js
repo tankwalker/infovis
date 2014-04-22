@@ -8,7 +8,7 @@
  * ============================================
  */
 
-function feedbackList(){
+function tableChart(divname){
 	var feedlist = {};
 	
 	var numberFormat = d3.format(".2r"),
@@ -17,7 +17,7 @@ function feedbackList(){
 	var data = [],
 		keys = [];
 	
-	var table = d3.select("#feedback-table");
+	var table = d3.select("#" + divname);
 	
 	feedlist.keys = function(_keys)	{
 		if(!arguments.length)
@@ -77,15 +77,31 @@ function hotelList(){
 	var width = 200,
 		height = 400,
 		margin = {left:10, top:10, right:10, bottom:10};
+		
+	var headers = ["nome", "rank", "feeds"];
+	var tabname = "hotel-table";
+	
+	var table = tableChart(tabname).keys(headers);
 	
 	var limit = 50,
 		dimension = null,
 		group = null,
 		data = [],
 		updateCallback = null,
-		selected = false;
+		selected = false,
+		thickness = 40;
 	
-	var svg = d3.select("#hotels").append("div");
+	var x = d3.scale.linear()
+		.domain([0, 5])
+		.range([0, width]);
+	
+	var y = d3.scale.ordinal()
+		.rangeRoundBands([0, height], .5);
+	
+	var div = d3.select("#hotels").append("div");
+	
+	var format = d3.format(".2r")
+	
 	var countDiv = d3.select("#hotels-number");
 	var hotelNameDiv = d3.select("#hotel-name");
 	
@@ -105,51 +121,48 @@ function hotelList(){
 	
 	list.render = function(){
 		// Retrieve only the hotel whose value is != 0, so they belong to selected region
-		var hotelInRegion = data.filter(function(d){ return d.value.count; });
+		var hotelInRegion = data.filter(function(d){ return d.value.count; })
+			.map(function(d){ return {nome: d.key, rank:d.value.rank, feeds:d.value.count}; });
 		
-		var entry = svg.selectAll(".entry").data(hotelInRegion, function(d){ return d.key; });
+		table.data(hotelInRegion).render();
 		
-		// Adds new hotel names into the list belonging to the choosed region
-		entry.enter().append("div")
-			.attr("class", "entry")
-			.text(function(d){ return d.key.capitalize(); })
+		var entry = d3.select("#"+tabname).selectAll("tr");
+		
+		entry
 			.on("mouseover", function(d){
 				if(!selected){
-					updateCallback({name: d.key, rank:d.value.rank}, this);
-					hotelNameDiv.text(d.key);
+					updateCallback({name: d[0].value, rank: d[1].value}, this);
+					hotelNameDiv.text(d[0].value);
 				}
 			})
 			.on("mouseout", function(d){
 				if(!selected){
 					updateCallback({name: null, rank:0}, this);
-					hotelNameDiv.text("Italia");
+					hotelNameDiv.text("Regione");
 				}
 			})
 			.on("click", function(d){
-				clicked({name: d.key, rank:d.value.rank}, this);
-				hotelNameDiv.text(d.key);
+				clicked({name: d[0].value, rank: d[1].value}, this);
+				hotelNameDiv.text(d[0].value);
 			});
 		
 		countDiv.text(hotelInRegion.length);
-		
-		// And removes the old one that do not belong to the selected region
-		entry.exit().remove();
 	};
 	
 	list.show = function(visible){
 		if(visible){
-			svg.transition()
+			div.transition()
 			.duration(100)
 			.style("opacity", 1)
 			.each("start", function(){
-				svg.style("display", "block");
+				div.style("display", "block");
 			});
 		} else {
-			svg.transition()
+			div.transition()
 			.duration(100)
 			.style("opacity", 0)
 			.each("end", function(){
-				svg.style("display", "none");
+				div.style("display", "none");
 			});
 		}
 		
@@ -241,7 +254,7 @@ function feedback(data){
 		.update(hotelChange);
 	
 	var turistChart = verticalBarChart(turistDiv)
-		.height(120).width(256)
+		.height(100).width(256)
 		.color(d3.scale.linear()
 			.range(["#6685e0", "#001a4c"])
 			.domain([0, 10]))
@@ -256,7 +269,7 @@ function feedback(data){
 		.width(200)
 		.heigth(50);
 	
-	var feedList = feedbackList(feedListDiv).keys(tableHeaders);
+	var feedList = tableChart(feedListDiv).keys(tableHeaders);
 	
 	var trend = lineChart(trendDiv)
 		.x(function(d){ return d.key; })
@@ -362,7 +375,7 @@ function feedback(data){
 			var r = p[key].bullet.ranges;
 			var a = +v[key];
 			
-			m[0] = (p.count * m[0]) - a/ --p[key].count;	// mean
+			m[0] = (p.count * m[0]) - a / --p[key].count;	// mean
 			if(r[0] > a || !r[0]) r[0] = a;					// min
 			if(r[1] < a) r[1] = a;							// max
 		});
@@ -416,24 +429,6 @@ function feedback(data){
 		
 		return bullets;
 	}
-	
-	/*function sentimentBullets2(){
-		var bRegion,
-			bHotel;
-		
-		bRegion = groupAllHotel.value();
-		bHotel = groupAllHotelFiltered.value();
-		
-		d3.keys(bHotel).forEach(function(key){
-			bHotel[key].bullet.markers[0] = bRegion[key].bullet.measures[0];
-		});
-		
-		return bHotel;
-	}*/
-	
-//	function hotelRanks(){
-//		return groupByHotel.reduce(reduceToRankAdd, null, reduceToRankInit).all();
-//	}
 	
 	fb.keys = function(_keys){
 		if(!arguments.length)
@@ -508,7 +503,7 @@ function feedback(data){
 	fb.renderHList = function(){
 		hotels
 			.data(groupByHotel.all())
-			.show(true)
+//			.show(true)
 			.render();
 		return fb;
 	};
@@ -526,8 +521,8 @@ function feedback(data){
 				div.style("display", _bool ? "block" : "none");
 		});
 		
-		hotels.clearSelection();
-		hotels.show(_bool);
+//		hotels.clearSelection();
+//		hotels.show(_bool);
 		return fb;
 	};
 	

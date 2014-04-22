@@ -1,129 +1,301 @@
 @CHARSET "UTF-8";
 
-/****** D3 topojson ******/
-.background {
-	fill:none;
-}
-
-path {
-	fill: gray;
-}
-
-.region {
-	stroke: black;
-	stroke-width: 0.5;
-}
-
-.region.active {
-	fill: orange;
-	stroke: white;
-	stroke-width: 1px;
-}
-
-.region.highlight {
-	stroke: white;
-	stroke-width: 1;
-	fill: #ccc;
-}
-
-
 /***** HTML-CSS *****/
-
-/* Elements */
 * {
 	color: white;
-	/* font-family: 'Fanwood Text', serif; */
 	font-family: 'Raleway', sans-serif;
 	font-weight: 200;
 }
 
 body {
-	background-color: #222;
+	background-color: #111;
 	margin: 0px;
 }
 
 header {
-	font-size: 30pt;
+	font-size: 22pt;
 	font-weight: 400;
 	margin: 8px;
 }
 
-h1 {
-	font-size: 20pt;
+h1,h1>* {
+	font-size: 14pt;
 	font-weight: 200;
 }
 
-h2 {
+h2,h2>* {
 	color: #ffcc00;
-	font-size: 18pt;
+	font-size: 14pt;
 	font-weight: 200;
 }
 
-h3 {
+h3,h3>* {
+	font-weight: 300;
+	font-size: 11pt;
+}
+
+/****** Map ******/
+#map {
+	/* position: absolute;
+	top: 80px;
+	left: 450px; */
+}
+
+#map .background {
+	fill: none;
+}
+
+#map .region {
+	fill: gray;
+	stroke: #111;
+	stroke-width: .2;
+}
+
+#map .region.active {
+	fill: orange;
+	stroke: white;
+	stroke-width: 1px;
+}
+
+#map .region.highlight {
+	stroke: white;
+	stroke-width: 1;
+	fill: #ddd;
+}
+
+#map .ranking {
+	stroke: #fff;
+	stroke-width: 1px;
+	fill: #ddd;
+	fill-opacity: .4;
+	pointer-events: none;
+}
+
+/*** Trend analysis ***/
+#trend-analysis {
+	color: white;
+	margin-left: 30px;
 	
 }
 
-/* Classes */
+#trend-analysis .x.axis line {
+	stroke: none;
+}
+
+#trend-analysis .y.axis line {
+	stroke-opacity: .125;
+}
+
+#trend-analysis .axis text {
+	fill: none;
+	stroke: #909090;
+}
+
+#trend-analysis .line {
+	fill: none;
+	stroke: #78c78e;
+	stroke-width: 2px;
+}
+
+#trend-analysis .dot {
+	fill: rgb(80, 159, 102);
+}
+
+#trend-analysis .area {
+	fill: #4a6150;
+	fill-opacity: .5;
+	stroke: none;
+}
+
+#trend-analysis .brush {
+	fill: #fff;
+	fill-opacity: .125;
+}
+
+/**** Bar Chart ****/
+.bar {
+	fill: #ddd;
+	stroke: #eee;
+	stroke-width: 1px;
+}
+
+.bar.over {
+	fill: orange;
+}
+
+text.textbar {
+	font-size: 10pt;
+}
+
+text.label {
+	font-size: 10pt;
+}
+
+.axis {
+	stroke: #fff;
+	/*stroke-width: .5px;*/
+	font-size: 8pt;
+}
+
+.axis path {
+	display: none;
+}
+
+.axis path,
+.axis line {
+	fill: none;
+	stroke: #fff;
+	stroke-width: 1px;
+	shape-rendering: crispEdges;
+}
+
+.brush .resize path,
+.brush .resize rect {
+	fill: #2c2c2c;
+	fill-opacity: .8;
+	stroke: #747474;
+	stroke-width: 1px;
+}
+
+/**** Turist-chart ****/
+#turist-chart .y.axis line {
+	stroke: #232323;
+	stroke-width: 1px;
+}
+
+#turist-chart .y.axis {
+	stroke: #ccc;
+}
+
+#turist-chart .x.axis path,
+#turist-chart .x.axis line {
+	stroke: none;
+}
+
+
+/**** Hotel list ****/
+#hotels .entry {
+	width: 250px;
+	background-color: rgba(255, 255, 255, .2);
+	padding: 5px;
+	margin: 1.5px;
+	color: #fff;
+	font-weight: 300;
+	font-size: 14pt;
+}
+
+#hotels .entry:hover, .entry rect:hover {
+	background-color: rgba(255, 255, 255, .4);
+	fill: orange;
+}
+
+#hotels .entry.active,
+#hotels .entry.active > rect.background {
+	/* background-color: rgba(250, 120, 46, .4); */
+	background-color: orange;
+	fill: orange;
+	fill-opacity: 1;
+}
+
+#hotels .entry > .background {
+	fill: #fff;
+	fill-opacity: .3;
+	pointer-events: auto;
+}
+
+#hotels .entry > .background:hover {
+	fill-opacity: .5;
+}
+
+#hotels .entry .rank {
+	fill: #000;
+	fill-opacity: .5;
+}
+
+#hotels .entry text {
+	font-size: 14px;
+	stroke: white;
+	pointer-events: none;
+}
+
+#hotels .entry rect {
+	pointer-events: none;
+}
+
+/**** Bullet Chart ****/
+.bullet {
+	font: 10px sans-serif;
+	display: block;
+}
+
+.bullet .marker {
+	stroke: #000;
+	stroke-width: 2px;
+}
+
+.bullet .tick line {
+	stroke: #eee;
+	stroke-width: .5px;
+}
+
+.bullet .tick text {
+	fill: #eee;
+}
+
+.bullet .range.r0 {
+	fill: #333;
+	stroke: white;
+}
+
+.bullet .range.r1 {
+	fill: #ccc;
+}
+
+.bullet .range.r2 {
+	fill: #999;
+}
+
+.bullet .range .bg {
+	fill: #fff;
+}
+
+.bullet .measure.m0 {
+	fill: /*#009020;*/ #5F0808;
+}
+
+.bullet .measure.m1 {
+	fill: lightsteelblue;
+}
+
+.bullet .title {
+	font-size: 14px;
+	font-weight: bold;
+	fill: #fff;
+}
+
+.bullet .subtitle {
+	fill: #eee;
+}
+
+/**** Classes ****/
 .ball {
 	display: inline-block;
 	width: 15px;
 	vertical-align: middle;
 }
 
-.bullet { font: 10px sans-serif; display: inline-block; }
-.bullet .marker { stroke: #000; stroke-width: 2px; }
-.bullet .tick line { stroke: #eee; stroke-width: .5px; }
-.bullet .tick text {fill: #eee;}
-.bullet .range.r0 { fill: #333; stroke: white;}
-.bullet .range.r1 { fill: #ccc; }
-.bullet .range.r2 { fill: #999; }
-.bullet .range .bg { fill: #fff; }
-.bullet .measure.m0 { fill: /*#009020;*/ #5F0808; }
-.bullet .measure.m1 { fill: lightsteelblue; }
-.bullet .title { font-size: 14px; font-weight: bold; fill: #fff;}
-.bullet .subtitle { fill: #eee; }
-
-.bar {
-	fill: #ffffff;
-}
-
 .inline {
 	display: inline-block;
+	vertical-align: top;
+	/* margin-left: 5px; */
 }
 
-.entry {
-    width: 250px;
-    background-color: rgba(255, 255, 255, .2);
-    padding: 5px;
-    margin: 1.5px;
-    color: #fff;
-    font-weight: 300;
-    font-size: 14pt;
-}
-
-.entry:hover {
-    background-color: rgba(255, 255, 255, .4);
-}
-
-.section {
-	/*background-color: rgba(71,71,71,0.8);*/
-}
-
-.textpie {
-	text-align: center;
-	font-weight: bold;
-	font-size: 10pt;
+.clickable {
+	cursor: pointer;
 }
 
 .visible {
 	display: block;
-}
-
-.ranking {
-	stroke: #fff;
-	stroke-width: 1.5px;
-	fill: #fff;
-	fill-opacity: .4;
 }
 
 .invisible {
@@ -131,26 +303,17 @@ h3 {
 }
 
 /* IDs */
+#wrapper {
+	width: 100%;
+	height: 100%;
+}
 
 #lside {
-	min-width: 380px;
+	min-width: 30%;
 	margin: 8px;
-/* 	position: absolute;
+	/* 	position: absolute;
 	top: 20px;
 	left: 10px, */
-}
-
-#hotels {
-	min-width: 400px;
-	position: absolute;
-	top: 50px;
-	right: 10px;
-}
-
-#map {
-	position: absolute;
-	top: 80px;
-	left: 450px;
 }
 
 #sentiment {
@@ -160,4 +323,88 @@ h3 {
 	right: 10px;*/
 	padding: 10px;
 	background: rgba(0, 0, 0, .3);
+	z-index: -10;
+}
+
+#feedback {
+	max-width: 600px;
+	margin-left: 20px;
+}
+
+#rank-wrapper {
+	font-weight: 200;
+	background: rgba(255, 255, 255, .05);
+	padding: 8px 20px 10px 20px;
+	border-radius: 10px;
+	text-align: center;
+}
+
+#scroll-down {
+	position: absolute;
+	right: 50px;
+}
+
+/**** Feedback table ****/
+.table-wrapper {
+	position: relative;
+	width: 90%;
+	margin-right: 10px;
+}
+
+.table-scroll {
+	height: 300px;
+	overflow: auto;
+	margin-top: 20px;
+}
+
+.table-wrapper table thead th>span {
+	position: absolute;
+	top: -20px;
+}
+
+table {
+	max-width: 100%;
+	background-color: transparent;
+}
+
+th,th>span {
+	text-align: left;
+	font-weight: bold;
+}
+
+.table {
+	width: 100%;
+	margin-bottom: 20px;
+}
+
+.table>thead>tr>th,.table>tbody>tr>th,.table>tfoot>tr>th,.table>thead>tr>td,.table>tbody>tr>td,.table>tfoot>tr>td
+	{
+	padding: 8px;
+	line-height: 1.42857143;
+	vertical-align: top;
+	border-top: 1px solid #ddd;
+}
+
+.table>thead>tr>th {
+	vertical-align: bottom;
+	border-bottom: 2px solid #ddd;
+}
+
+.table-hover>tbody>tr:hover>td,.table-hover>tbody>tr:hover>th {
+	background-color: #555;
+}
+
+/*** Rank chart ***/
+.progress-meter .background {
+	fill: #ccc;
+}
+
+.progress-meter .foreground {
+	fill: #334455;
+}
+
+.progress-meter text {
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-size: 24px;
+	font-weight: bold;
 }
