@@ -306,9 +306,9 @@ text.label {
 
 #rank-wrapper {
 	font-weight: 200;
-	background-color: rgba(255, 255, 255, .05);
-	padding: 10px 40px 10px 40px;
-	border-radius: 15px;
+	background: rgba(255, 255, 255, .05);
+	padding: 8px 20px 10px 20px;
+	border-radius: 10px;
 	text-align: center;
 }
 
