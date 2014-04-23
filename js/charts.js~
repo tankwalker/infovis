@@ -646,7 +646,7 @@ function bulletChart(divname){
 function lineChart(divName){
 	var chart = {};
 	
-	var width = 670,
+	var width = 750,
 		height = 220,
 		margin = {left:40, top:25, right:40, bottom:25},
 		thickness = 1.5,

@@ -39,6 +39,10 @@
 				.text("Show feedback list");
 		table.slideToggle(opt);
 	}
+	
+	function scroll(value) {
+		$("html,body").animate({scrollTop:value}, "slow");
+	}
 //-->
 </script>
 
@@ -52,20 +56,18 @@
 	<header id="header">The filtered coffee survey</header>
 		<!-- Contenitore degli elementi di dettaglio della regione selezionata -->
 		<div id="lside" class="inline">
-			<h1>Dettagli della regione</h1>
-
 			<h2 id="region-name">Italia</h2>
-
-			<div id="composition">
-				<h3>Consumi di caffè</h3>
-				<div id="fan-chart" class="chart"></div>
-			</div>
 
 			<div id="consumes">
 				<h3>Consumo percentuale</h3>
 				<div id="consume-chart" class="chart"></div>
 			</div>
-
+			
+			<div id="composition">
+				<h3>Consumi di caffè</h3>
+				<div id="fan-chart" class="chart"></div>
+			</div>
+			
 			<div id="turist">
 				<h3>Composizione turisti</h3>
 				<div id="turist-chart" class="chart"></div>
@@ -78,10 +80,33 @@
 		</div>
 
 		<div id="hotel-container" class="inline">
+		
+			<!-- Hotel rank -->
+			<!-- <div id="rank-wrapper" class="inline">
+				<p>Valutazione struttura</p>
+				<div id="rank"></div>
+			</div> -->
+	
 			<div id="hotels">
-				<img class="ball inline" src="images/info.png" style="padding: 5px">
-				<h3 class="inline">Numero delle strutture presenti:</h3>
-				<div id="hotels-number" class="inline">NA</div>
+				<h3 class="inline">
+					<span>
+						<img class="ball inline" src="images/info.png" style="padding: 5px">
+					</span>
+					<span id="hotels-number">NA</span> strutture presenti nella regione
+				</h3>
+				
+				<!-- Tabella dei feedback -->
+				<div class="table-wrapper">
+					<div class="table-scroll">
+						<table id="hotel-table" class="table table-hover">
+							<thead>
+							</thead>
+							<tbody>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				
 			</div>
 		</div>
 	</div>
@@ -89,37 +114,33 @@
 	<!-- Rappresentazione della sentiment analysis con foucs sulla struttura selezionata -->
 	<div id="sentiment" style="opacity: 0; display: none;">
 		<h2>
-			Statistiche: <span id="hotel-name">Italia</span>
+			Dettgli feedback: <span id="hotel-name">Regione</span>
 		</h2>
-
+		
+		<a id="scroll-down"><img class="inline clickable" src="images/arrow_down.png" width="25px" onclick="scroll(240)"></img></a>
+		
 		<div>
-			<h3>Sentiment Analysis</h3>
-
-			<!-- Hotel rank -->
-			<div id="rank-wrapper" class="inline">
-				<p>Valutazione globale</p>
-				<div id="rank"></div>
-			</div>
-
 			<!-- Sentiment analysis -->
 			<div class="inline">
 				<div id="feedback"></div>
 			</div>
+			
+			<!-- Grafico dell'andamento delle valutazioni -->
+			<div id="trend-analysis" class="inline"></div>
+
 		</div>
 
+		<!-- Tabella dei feedback -->
 		<div>
-			<div>
-				<h3 class="inline">Feedback trend</h3>
-				<div id="button-showflist" class="inline">
-					<span onclick="toggleFeedList()"
-						style="cursor: pointer; margin-left: 50px">Hide feedback
-						list</span>
-				</div>
-			</div>
+			<h3 class="inline">Feedback trend
+				<a onclick="toggleFeedList();"
+					style="cursor: pointer; margin-left: 50px">Hide feedback
+					list
+				</a>
+			</h3>
 
-			<!-- Tabella dei feedback -->
-			<div id="table-wrapper" class="inline" style="display:none;">
-				<div id="table-scroll">
+			<div class="inline table-wrapper" style="display:none;">
+				<div class="table-scroll">
 					<table id="feedback-table" class="table table-hover">
 						<thead>
 						</thead>
@@ -128,11 +149,8 @@
 					</table>
 				</div>
 			</div>
-
-			<!-- Grafico dell'andamento delle valutazioni -->
-			<div id="trend-analysis" class="inline"></div>
-
 		</div>
+		
 	</div>
 
 	<footer id="footer"></footer>

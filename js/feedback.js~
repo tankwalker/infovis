@@ -131,6 +131,7 @@ function hotelList(){
 		entry
 			.on("mouseover", function(d){
 				if(!selected){
+					console.log(d);
 					updateCallback({name: d[0].value, rank: d[1].value}, this);
 					hotelNameDiv.text(d[0].value);
 				}
