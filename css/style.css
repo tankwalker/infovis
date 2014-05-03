@@ -15,7 +15,6 @@ body {
 header {
 	font-size: 22pt;
 	font-weight: 400;
-	margin: 8px;
 }
 
 h1,h1>* {
@@ -27,11 +26,13 @@ h2,h2>* {
 	color: #ffcc00;
 	font-size: 14pt;
 	font-weight: 200;
+	margin: 10px 0px;
 }
 
 h3,h3>* {
 	font-weight: 300;
 	font-size: 11pt;
+	margin: 5px 0px;
 }
 
 /****** Map ******/
@@ -74,12 +75,11 @@ h3,h3>* {
 /*** Trend analysis ***/
 #trend-analysis {
 	color: white;
-	margin-left: 30px;
-	
+	margin-left: 10px;
 }
 
 #trend-analysis .x.axis line {
-	stroke: none;
+	stroke: #909090;
 }
 
 #trend-analysis .y.axis line {
@@ -172,6 +172,9 @@ text.label {
 	stroke: none;
 }
 
+#turist-chart .x.axis text {
+	stroke-width: .8px;
+}
 
 /**** Hotel list ****/
 #hotels .entry {
@@ -268,7 +271,7 @@ text.label {
 }
 
 .bullet .title {
-	font-size: 14px;
+	font-size: 12px;
 	font-weight: bold;
 	fill: #fff;
 }
@@ -287,19 +290,14 @@ text.label {
 .inline {
 	display: inline-block;
 	vertical-align: top;
-	/* margin-left: 5px; */
 }
 
 .clickable {
 	cursor: pointer;
 }
 
-.visible {
-	display: block;
-}
-
 .invisible {
-	display: none;
+	opacity: 0;
 }
 
 /* IDs */
@@ -308,38 +306,25 @@ text.label {
 	height: 100%;
 }
 
-#lside {
+#coffee-details {
 	min-width: 30%;
-	margin: 8px;
-	/* 	position: absolute;
-	top: 20px;
-	left: 10px, */
+	margin-left: 8px;
+}
+
+#feedback-details {
+	padding: 5px 8px;
+	background: rgba(0, 0, 0, .3);
 }
 
 #hotels {
 	min-width: 20%;
 	max-height: 260px;
-	/* 	position: absolute;
-	top: 50px; */
 	right: 10px;
-/*	overflow: auto;
- 	position: fixed;
-	top: 50px; */
 }
 
 #sentiment {
-	width: 100%;
-	position: absolute;
-	/*bottom: 10px;
-	right: 10px;*/
-	padding: 10px;
-	background: rgba(0, 0, 0, .3);
-	z-index: -10;
-}
-
-#feedback {
-	max-width: 600px;
-	margin-left: 20px;
+	position: relative;
+	right: -40px;
 }
 
 #rank-wrapper {
@@ -396,13 +381,28 @@ th,th>span {
 	border-top: 1px solid #ddd;
 }
 
-.table>thead>tr>th {
+.table > thead > tr > th {
 	vertical-align: bottom;
 	border-bottom: 2px solid #ddd;
 }
 
-.table-hover>tbody>tr:hover>td,.table-hover>tbody>tr:hover>th {
+.table > tbody > tr,
+.table > tbody > tr > td {
+	font-weight: 300;
+}
+
+.table-hover > tbody > tr:hover > td,
+.table-hover > tbody > tr:hover > th {
 	background-color: #555;
+}
+
+.table-hover > tbody > tr.active > td,
+.table-hover > tbody > tr.active:hover > td {
+	background-color: orange;
+}
+
+.table-hover > tbody > tr.active > td {
+	color: black;
 }
 
 /*** Rank chart ***/

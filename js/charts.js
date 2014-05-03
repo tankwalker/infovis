@@ -37,7 +37,7 @@ function barChart(div){
 		var rectData = svg.selectAll(".bar").data(data);
 		var labelData = svg.selectAll(".label").data(data);
 		var textData = svg.selectAll(".textbar").data(data);
-		
+
 		pos.domain(data.map(function(d){ return d.key; }));
 		
 		bar.range([0, width]);
@@ -269,9 +269,13 @@ function verticalBarChart(div){
 		var rectData = svg.selectAll(".bar").data(data);
 		var labelData = svg.selectAll(".label").data(data);
 		var textData = svg.selectAll(".textbar").data(data);
+		var maxValue = d3.max(data, function(d){ return d.value; });
+		
+		maxValue = parseInt((maxValue + 100 - 1)/100) * 100;
 		
 		pos.domain(data.map(function(d){ return d.key; }));
-		bar.range([height, 0]);
+		bar.range([height, 0])
+			.domain([0, maxValue]);
 		
 		gxAxis.call(xAxis)
 			.selectAll("text")
@@ -445,11 +449,11 @@ function bulletChart(divname){
 	var chart = {};
 	
 	var width = 150,
-		height = 30,
-		margin = {top:30, right:10, bottom:10, left:10};
+		height = 15,
+		margin = {top:20, right:10, bottom:15, left:10};
 	
-	var keys = ["flavour", "freshness", "temperature", "service"],
-		thickness = 20,
+	var keys = ["flavor", "freshness", "temperature", "service"],
+		thickness = 9,
 		length = width,
 		vertical = false,
 		plotTick = true,
@@ -507,7 +511,7 @@ function bulletChart(divname){
 	      	.attr(vertical ? "x2" : "y2", thickness / 7 * 6);
 	      
 	      tick.append("text")
-	      	.attr(vertical ? "dx" : "dy", 5)
+	      	.attr(vertical ? "dx" : "dy", 6)
 	      	.attr(vertical ? "x" : "y", thickness * 7 / 6)
 	      	.style("text-anchor", "middle")
 	      	.text(function(d, i){ return i; });
@@ -640,15 +644,22 @@ function bulletChart(divname){
 		return chart;
 	};
 	
+	chart.keys = function(_keys){
+		if(!arguments.length)
+			return keys;
+		keys = _keys;
+		return chart;
+	};
+	
 	return chart;
 }
 
 function lineChart(divName){
 	var chart = {};
 	
-	var width = 670,
-		height = 220,
-		margin = {left:40, top:25, right:40, bottom:25},
+	var width = 450,
+		height = 180,
+		margin = {left:20, top:25, right:20, bottom:25},
 		thickness = 1.5,
 		name = null,
 		color = "#fff";
@@ -672,12 +683,13 @@ function lineChart(divName){
 		.ticks(d3.time.month, 3)
 		.tickFormat(d3.time.format("%b %Y"))
 		.tickPadding(8)
-		.tickSize(-height)
+		.tickSize(3)
 		.tickSubdivide(true);
 
 	var yAxis = d3.svg.axis()
 		.scale(y)
 		.tickSize(-width)
+		.ticks(4)
 		.orient("left");
 	
 	var svg = d3.select("#"+divName).append("svg")

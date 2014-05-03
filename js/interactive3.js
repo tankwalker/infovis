@@ -3,7 +3,7 @@ var coffeeCompUrl = "csv/coffees.csv",
 	turistCompUrl = "csv/turist.csv",
 	mapUrl = "json/ita2.json",
 	rankingUrl = "csv/ranking.csv",
-	sentimentUrl = "csv/sentiment3.csv";
+	sentimentUrl = "csv/sentiment.csv";
 
 var regionSelected = {};
 
@@ -45,14 +45,14 @@ String.prototype.capitalize = function() {
  * Builds main map which allow to select regions
  */
 function mapBuild(){
-	var width = 350,
+	var width = 320,
 		height = width;
 
 	var projection = d3.geo.albers()
 		.center([0, 42])
         .rotate([347, 0])
         .parallels([35, 45])
-        .scale(height * 4)
+        .scale(height * 5)
         .translate([width/2, height/2]);
 
 	var path = d3.geo.path()
@@ -115,6 +115,7 @@ function mapBuild(){
 		if(regionSelected.path !== region || !regionSelected.focus){
 			var center = path.centroid(region);
 			var name = region.properties.name;
+			var id = region.properties.id;
 
 			x = center[0];
 			y = center[1];
@@ -122,22 +123,19 @@ function mapBuild(){
 			
 			regionSelected.name = name.capitalize();
 			regionSelected.path = region;
+			regionSelected.id = id;
 			regionSelected.focus = true;
 			
 			// List all the hotel for the selected region
-			feedback.filterRegion(regionSelected.name)
+			feedback.filterRegion(regionSelected.id)
 				.filterHotel(null)
 				.visible(true)
-				.renderAll()
-				.renderHList();
+				.renderAll();
 			
 			// Show the sentiment section
-			div.transition()
+			/*div.transition()
 				.duration(duration)
-				.style("opacity", 1)
-				.each("start", function(){
-					div.style("display", "block");
-				});
+				.style("opacity", 1);*/
 			
 			// Dispatch the stateChange event to update all the charts
 			dispatch.regionChange(regionSelected.name);
@@ -150,15 +148,13 @@ function mapBuild(){
 			
 			regionSelected.name = null;
 			regionSelected.path = null;
+			regionSelected.id = null;
 			regionSelected.focus = false;
 			
 			// Hide the sentiment section
-			div.transition()
+			/*div.transition()
 				.duration(duration)
-				.style("opacity", 0)
-				.each("end", function(){
-					div.style("display", "none");
-				});
+				.style("opacity", 0);*/
 			
 			// Clear sentiment analysis section
 			feedback
@@ -206,23 +202,25 @@ function mapBuild(){
 		
 		// Select the region
 			var regionName = region.properties.name;
+			var id = region.properties.id;
 
 			regionSelected.name = regionName.capitalize();
 			regionSelected.path = region;
+			regionSelected.id = id;
 			regionSelected.focus = false;
 
 			sub.selectAll("path")
 				.classed("highlight", regionSelected && function(d){ return d === regionSelected.path; });
 	
 			// List all the hotel for the selected region
-			feedback.filterRegion(regionSelected.name)
+			feedback.filterRegion(regionSelected.id)
 				.filterHotel(null)
 				.filterCountry(null)
 				.renderAll();
+		}
 			
 			// Dispatch the stateChane event to update all the charts
 			dispatch.regionChange(regionSelected.name);
-		}
 	};
 	
 	
