@@ -8,11 +8,12 @@
  * ============================================
  */
 
+var hlist = false;
+
 function tableChart(divname){
 	var feedlist = {};
 	
-	var numberFormat = d3.format(".2r"),
-		dateFormat = d3.time.format("%e %b %Y");
+	var dateFormat = d3.time.format("%e %b %Y");
 	
 	var data = [],
 		keys = [];
@@ -34,6 +35,7 @@ function tableChart(divname){
 			.enter().append("th").append("span")
 				.text(function(d){ return d.capitalize(); });
 		
+		table.select("tbody").selectAll("tr").remove();
 		var feeds = table.select("tbody").selectAll("tr").data(data);
 		
 		// create rows
@@ -41,15 +43,13 @@ function tableChart(divname){
 		 
 		// cells
 		var td = tr.selectAll("td")
-			.data(function(d, i){ return d;})
+			.data(function(d, i){ return d; })
 			.enter().append("td")
 			.text(function(d) {
 				if(d.key === "date") return dateFormat(d.value);
 				if(d.value == undefined) return "Unavailable";
-				if(!isNaN(d.value)) return numberFormat(+d.value);
+				if(!isNumeric(d.value)) return +d.value;
 				return d.value; });
-	
-		feeds.exit().remove();
 		
 		return feedlist;
 	};
@@ -78,7 +78,7 @@ function hotelList(){
 		height = 400,
 		margin = {left:10, top:10, right:10, bottom:10};
 		
-	var headers = ["nome", "rank", "feeds"];
+	var headers = ["rank", "stars", "facilities", "feeds"];
 	var tabname = "hotel-table";
 	
 	var table = tableChart(tabname).keys(headers);
@@ -100,29 +100,28 @@ function hotelList(){
 	
 	var div = d3.select("#hotels").append("div");
 	
-	var format = d3.format(".2r")
+	var floatFormat = d3.format(".2r");
 	
 	var countDiv = d3.select("#hotels-number");
-	var hotelNameDiv = d3.select("#hotel-name");
 	
 	function clicked(hotel, div){
-		var name = hotel.name;
+		var id = hotel.stars;
 
-		if(selected === name || name === null){
+		if(selected === id || id === null){
 			selected = null;
-			d3.selectAll(".entry").classed("active", false);
+			d3.selectAll("tr").classed("active", false);
 			return;
 		}
 		
-		selected = name;
-		d3.selectAll(".entry").classed("active", function(d) { return d.key === name; });
+		selected = id;
+		d3.selectAll("tr").classed("active", function(d) { return d[1].value === id; });
 		updateCallback(hotel, div);
 	}
 	
 	list.render = function(){
 		// Retrieve only the hotel whose value is != 0, so they belong to selected region
 		var hotelInRegion = data.filter(function(d){ return d.value.count; })
-			.map(function(d){ return {nome: d.key, rank:d.value.rank, feeds:d.value.count}; });
+			.map(function(d){ return {rank:floatFormat(d.value.rank), stars: d.key, facilities:0, feeds:d.value.count}; });
 		
 		table.data(hotelInRegion).render();
 		
@@ -131,19 +130,19 @@ function hotelList(){
 		entry
 			.on("mouseover", function(d){
 				if(!selected){
-					updateCallback({name: d[0].value, rank: d[1].value}, this);
-					hotelNameDiv.text(d[0].value);
+					hlist = true;
+					updateCallback({rank: d[0].value, stars: d[1].value}, this);
 				}
 			})
 			.on("mouseout", function(d){
 				if(!selected){
-					updateCallback({name: null, rank:0}, this);
-					hotelNameDiv.text("Regione");
+					hlist = true;
+					updateCallback({rank: 0, stars: null}, this);
 				}
 			})
 			.on("click", function(d){
-				clicked({name: d[0].value, rank: d[1].value}, this);
-				hotelNameDiv.text(d[0].value);
+				hlist = true;
+				clicked({rank: d[0].value, stars: d[1].value}, this);
 			});
 		
 		countDiv.text(hotelInRegion.length);
@@ -227,6 +226,10 @@ function hotelList(){
 	return list;
 }
 
+function isNumeric(obj) {
+    return obj - parseFloat(obj) >= 0;
+}
+
 function subObject(obj, keys){
 	var res = {};
 	keys.forEach(function(key){
@@ -238,8 +241,8 @@ function subObject(obj, keys){
 function feedback(data){
 	var fb = {};
 	
-	var keys = ["flavour", "freshness", "temperature", "service"],
-		tableHeaders = ["date", "flavour", "freshness", "temperature", "service", "country"],
+	var keys = ["flavor", "freshness", "temperature", "service"],
+		tableHeaders = ["date", "flavor", "freshness", "temperature", "service", "country"],
 		limit = Infinity,
 		region = null,
 		hotel = null,
@@ -269,20 +272,22 @@ function feedback(data){
 		.width(200)
 		.heigth(50);
 	
-	var feedList = tableChart(feedListDiv).keys(tableHeaders);
+//	var feedList = tableChart(feedListDiv).keys(tableHeaders);
 	
 	var trend = lineChart(trendDiv)
 		.x(function(d){ return d.key; })
 		.y(function(d){ return d.value.rank; })
 		.filter(function(e){ fb.filterDate(e).renderAll(); });
 	
+//	var rank = rankChart("rank");
 	var formatDate = d3.time.format("%Y-%m-%d %H:%M:%S");
-
-	var rank = rankChart("rank");
 	
 	// Parses records to cast fields
 	data.forEach(function(d){
 		d.date = formatDate.parse(d.date);
+		d.stars = +d.stars;
+		d.rooms = +d.rooms;
+		d.region = +d.region;
 		keys.forEach(function(k){
 			d[k] = +d[k];
 		});
@@ -291,63 +296,76 @@ function feedback(data){
 	// Create crossfilter and dimensions to filter feedbacks
 	 feedback = crossfilter(data),
 		feedbackByRegion = feedback.dimension(function(d){ return d.region; }),
-		feedbackByHotel = feedback.dimension(function(d){ return d.hotel; }),
-		feedbackByHotelFilter = feedback.dimension(function(d){ return d.hotel; }),
+//		feedbackByHotel = feedback.dimension(function(d){ return d.hotel; }),
+//		feedbackByHotelFilter = feedback.dimension(function(d){ return d.hotel; }),
 		feedbackByCountry = feedback.dimension(function(d){ return d.country; }),
 		feedbackByDate = feedback.dimension(function(d){ return d.date; }),
-		feedbackByKey = {
-			group:function(){
-				var res = [];
-
-				keys.forEach(function(key, idx){
-					var sum = feedbackByKey[key].groupAll().reduceSum(function(d){ return +d[key]; }).value();
-					var count = feedbackByKey[key].groupAll().reduceCount().value();
-					var extent = d3.extent(feedbackByKey[key].top(Infinity), function(d){ return +d[key]; });
-					res.push({key:key, sum:sum, count:count, mean:sum/count, ranges:extent});
-				});
-
-				return res;
-			},
-		};
+		feedbackByStars = feedback.dimension(function(d){ return d.stars; }),
+//		feedbackByRooms = feedback.dimension(function(d){ return d.rooms; }),
+		
+		feedbackByKey = {},
+		groupByKey = {},
 		keys.forEach(function(key){
 			feedbackByKey[key] = feedback.dimension(function(d){ return d[key]; });
+			groupByKey[key] = feedbackByKey[key].groupAll();
 		}),
+		feedbackByKey.group = function(){
+			var res = [];
+			
+			keys.forEach(function(key, idx){
+				var sum = groupByKey[key].reduceSum(function(d){ return +d[key]; }).value();
+				var count = groupByKey[key].reduceCount().value();
+				var extent = d3.extent(feedbackByKey[key].top(Infinity), function(d){ return +d[key]; });
+				res.push({key:key, sum:sum, count:count, mean:sum/count, ranges:extent});
+			});
+
+			return res;
+	 };
 		groupByCountry = feedbackByCountry.group(),
-		groupByHotel = feedbackByHotel.group(),
-		groupAllHotelFiltered = feedbackByHotelFilter.groupAll();
-		groupAllHotel = feedbackByHotel.groupAll(),
+//		groupByHotel = feedbackByHotel.group(),
+		groupByStars = feedbackByStars.group(),
+		groupBullet = feedbackByStars.groupAll(),
+//		groupAllHotelFiltered = feedbackByHotelFilter.groupAll();
+//		groupAllHotel = feedbackByHotel.groupAll(),
 		groupByRegion = feedbackByRegion.group(),
 		groupAllRegion = feedbackByRegion.groupAll(),
 		groupByDate = feedbackByDate.group(d3.time.day);
 		
-	groupAllHotel.reduce(reduceBulletAdd, null, reduceBulletInit);
-	groupAllHotelFiltered.reduce(reduceBulletAdd, null, reduceBulletInit);
-	groupByHotel.reduce(reduceToRankAdd, reduceToRankRemove, reduceToRankInit).order(function(p){ return p.rank; });
+	groupBullet.reduce(reduceBulletAdd, reduceBulletRemove, reduceBulletInit);
+//	groupAllHotelFiltered.reduce(reduceBulletAdd, null, reduceBulletInit);
+//	groupByHotel.reduce(reduceToRankAdd, reduceToRankRemove, reduceToRankInit).order(function(p){ return p.rank; });
+	groupByStars.reduce(reduceToRankAdd, reduceToRankRemove, reduceToRankInit).order(function(p){ return p.rank; });
 	groupByCountry.reduceCount();
 	groupByDate.reduce(reduceToRankAdd, reduceToRankRemove, reduceToRankInit).order(function(p){ return +p.key; });
-	regionRank = feedbackByHotelFilter.groupAll().reduce(reduceToRankAdd, reduceToRankRemove, reduceToRankInit);
+	regionRank = feedbackByRegion.groupAll().reduce(reduceToRankAdd, reduceToRankRemove, reduceToRankInit);
 	
 	/* ---- reduce functions ----*/
 	function reduceToRankAdd(p, v){
+		var mean = 0;
 		keys.forEach(function(key){
 			var a = +v[key];
-			p.rank += (a - p.rank) / ++p.count;
+			mean += a;
 		});
 		
+		mean /= keys.length;
+		p.rank += (mean - p.rank) / ++p.count;
 		return p;
 	}
 	
 	function reduceToRankRemove(p, v){
+		var mean = 0;
 		keys.forEach(function(key){
 			var a = +v[key];
-			p.count--;
-			if(!p.count){
-				p.rank = 0;
-				return p;
-			}
-			p.rank = (((p.count+1) * p.rank) - a) / p.count;
+			mean += a;
 		});
 		
+		mean /= keys.length;
+		p.count--;
+		if(!p.count){
+			p.rank = 0;
+			return p;
+		}
+		p.rank = (((p.count+1) * p.rank) - mean) / p.count;
 		return p;
 	}
 	
@@ -357,30 +375,43 @@ function feedback(data){
 	
 	function reduceBulletAdd(p, v){
 		keys.forEach(function(key){
-			var m = p[key].bullet.measures;
-			var r = p[key].bullet.ranges;
+			var obj = p[key];
+			var m = obj.bullet.measures;
+			var r = obj.bullet.ranges;
 			var a = +v[key];
 			
-			m[0] += (a - m[0]) / ++p[key].count;	// mean
-			if(r[0] > a || !r[0]) r[0] = a;			// min
-			if(r[1] < a) r[1] = a;					// max
+			m[0] += (a - m[0]) / ++obj.count;	// mean
+
+			if (a <= obj.min())
+				obj.extents.unshift(a);
+			if (a >= obj.max())
+				obj.extents.push(a);
+
+			r[0] = obj.min();
+			r[1] = obj.max();
 		});
-		
+
 		return p;
 	}
 
 	function reduceBulletRemove(p, v){
 		keys.forEach(function(key){
-			var m = p[key].bullet.measures;
-			var r = p[key].bullet.ranges;
+			var obj = p[key];
+			var m = obj.bullet.measures;
+			var r = obj.bullet.ranges;
 			var a = +v[key];
-			
-			m[0] = (p.count * m[0]) - a / --p[key].count;	// mean
-			if(r[0] > a || !r[0]) r[0] = a;					// min
-			if(r[1] < a) r[1] = a;							// max
+
+			m[0] = (obj.count * m[0]) - a / --obj.count;	// mean
+
+			var index = obj.extents.indexOf(a);
+			if (index >= 0)
+				obj.extents.splice(index, 1);
+
+			r[0] = obj.min();
+			r[1] = obj.max();
 		});
-		
-		return null;
+
+		return p;
 	}
 
 	function reduceBulletInit(){
@@ -393,7 +424,14 @@ function feedback(data){
 					ranges: [0, 0, 5],
 					markers: [0]
 				},
-				count: 0
+				count: 0,
+				extents: [],
+				max: function() {
+				      return (this.extents.length > 0) ? this.extents[this.extents.length - 1] : null;
+				    },
+			    min: function() {
+			      return (this.extents.length > 0) ? this.extents[0] : null;
+			    }
 			};
 		});
 		
@@ -406,11 +444,11 @@ function feedback(data){
 			hotelValue;
 
 		// To get region values
-		feedbackByHotel.filterAll();
+		feedbackByStars.filterAll();
 		regionValue = feedbackByKey.group();
 		
-		// Filter feedbacks by hotel
-		feedbackByHotel.filter(hotel);
+		// Filter feedbacks by hotel type
+		feedbackByStars.filter(hotel);
 		hotelValue = feedbackByKey.group();
 		
 		var bullets = {};
@@ -451,8 +489,6 @@ function feedback(data){
 			hotel = null;
 		}
 		hotel = _filter;
-//		feedbackByHotel.filter(hotel);
-//		feedbackByHotelFilter.filter(hotel);
 		return fb;
 	};
 	
@@ -466,10 +502,14 @@ function feedback(data){
 	};
 	
 	fb.filterDate = function(extent){
-		if(!extent)
+		if(!extent){
 			feedbackByDate.filterAll();
-		else
+			extent = d3.extent(feedbackByDate.top(Infinity), function(d){ return d.date; });
+		} else
 			feedbackByDate.filterRange(extent);
+		
+		d3.select("#date-extent")
+			.text(function(){ return extent[0].toLocaleDateString() + " - " + extent[1].toLocaleDateString(); });
 		
 		return fb;
 	};
@@ -479,10 +519,10 @@ function feedback(data){
 			.data(sentimentBullets())
 			.render();
 		
-		feedList
+		/*feedList
 			.data(feedbackByHotel.top(limit)
 					.sort(function(a, b){ return +a.date - +b.date; }))
-			.render();
+			.render();*/
 		
 		turistChart
 			.data(groupByCountry.all())
@@ -494,44 +534,41 @@ function feedback(data){
 					.sort(function(a, b){ return a.key.getTime() - b.key.getTime(); }))
 			.render();
 		
-		rank.data(regionRank.value().rank)
-			.render();
+		/*rank.data(regionRank.value().rank)
+			.render();*/
+		
+		if(!hlist) {
+			fb.renderHList();
+		}
+		hlist = false;
 		
 		return fb;
 	};
 	
 	fb.renderHList = function(){
 		hotels
-			.data(groupByHotel.all())
-//			.show(true)
+			.data(groupByStars.top(5))
 			.render();
 		return fb;
 	};
 	
-	fb.renderHotelRank = function(r){
-		rank.data(r).render();
-	};
-	
+	//TODO: unused
 	fb.visible = function(_bool){
 		// Show/hide the sentiment section
 		d3.select(sentimentDiv).transition()
 			.duration(duration)
 			.style("opacity", _bool ? 1 : 0)
 			.each("start", function(){
-				div.style("display", _bool ? "block" : "none");
+				div.classed("invisible", _bool);
 		});
-		
-//		hotels.clearSelection();
-//		hotels.show(_bool);
+
 		return fb;
 	};
 	
 	function hotelChange(hotel, context){
-		var name = hotel.name;
-		var rank = hotel.rank;
+		var stars = hotel.stars;
 		
-		fb.filterHotel(name);
-		fb.renderHotelRank(rank);
+		fb.filterHotel(stars);
 		fb.renderAll();
 	}
 	
@@ -541,8 +578,11 @@ function feedback(data){
 		fb.renderAll();
 	}
 	
-	fb.filterDate([d3.time.year.offset(new Date(), -2), new Date()]);		//FIXME: da integrare
-//	dispatch.on("regionChange.feedback", regionChange);
+	// Init filters
+	fb.filterRegion(null);
+	fb.filterHotel(null);
+	fb.filterCountry(null);
+	fb.filterDate(d3.extent(feedbackByDate.top(Infinity), function(d){ return d.date; }));
 	
 	return fb;
 }

@@ -15,7 +15,6 @@ body {
 header {
 	font-size: 22pt;
 	font-weight: 400;
-	margin: 8px;
 }
 
 h1,h1>* {
@@ -27,11 +26,13 @@ h2,h2>* {
 	color: #ffcc00;
 	font-size: 14pt;
 	font-weight: 200;
+	margin: 10px 0px;
 }
 
 h3,h3>* {
 	font-weight: 300;
 	font-size: 11pt;
+	margin: 5px 0px;
 }
 
 /****** Map ******/
@@ -70,7 +71,7 @@ h3,h3>* {
 }
 
 #trend-analysis .x.axis line {
-	stroke: none;
+	stroke: #909090;
 }
 
 #trend-analysis .y.axis line {
@@ -163,11 +164,65 @@ text.label {
 	stroke: none;
 }
 
+<<<<<<< HEAD
 /**** Classes ****/
 .ball {
 	display: inline-block;
 	width: 15px;
 	vertical-align: middle;
+=======
+#turist-chart .x.axis text {
+	stroke-width: .8px;
+}
+
+/**** Hotel list ****/
+#hotels .entry {
+	width: 250px;
+	background-color: rgba(255, 255, 255, .2);
+	padding: 5px;
+	margin: 1.5px;
+	color: #fff;
+	font-weight: 300;
+	font-size: 14pt;
+}
+
+#hotels .entry:hover, .entry rect:hover {
+	background-color: rgba(255, 255, 255, .4);
+	fill: orange;
+}
+
+#hotels .entry.active,
+#hotels .entry.active > rect.background {
+	/* background-color: rgba(250, 120, 46, .4); */
+	background-color: orange;
+	fill: orange;
+	fill-opacity: 1;
+}
+
+#hotels .entry > .background {
+	fill: #fff;
+	fill-opacity: .3;
+	pointer-events: auto;
+}
+
+#hotels .entry > .background:hover {
+	fill-opacity: .5;
+}
+
+#hotels .entry .rank {
+	fill: #000;
+	fill-opacity: .5;
+}
+
+#hotels .entry text {
+	font-size: 14px;
+	stroke: white;
+	pointer-events: none;
+}
+
+#hotels .entry rect {
+	pointer-events: none;
+>>>>>>> 20041d30235d0cce260baa696de96c9a71bf7e21
 }
 
 .bullet {
@@ -215,7 +270,7 @@ text.label {
 }
 
 .bullet .title {
-	font-size: 14px;
+	font-size: 12px;
 	font-weight: bold;
 	fill: #fff;
 }
@@ -227,7 +282,6 @@ text.label {
 .inline {
 	display: inline-block;
 	vertical-align: top;
-	/* margin-left: 5px; */
 }
 
 .entry {
@@ -249,6 +303,7 @@ text.label {
 	background-color: orange;
 }
 
+<<<<<<< HEAD
 .visible {
 	display: block;
 }
@@ -260,8 +315,10 @@ text.label {
 	fill-opacity: .4;
 }
 
+=======
+>>>>>>> 20041d30235d0cce260baa696de96c9a71bf7e21
 .invisible {
-	display: none;
+	opacity: 0;
 }
 
 /* IDs */
@@ -270,38 +327,31 @@ text.label {
 	height: 100%;
 }
 
-#lside {
+#coffee-details {
 	min-width: 30%;
-	margin: 8px;
-	/* 	position: absolute;
-	top: 20px;
-	left: 10px, */
+	margin-left: 8px;
+}
+
+#feedback-details {
+	padding: 5px 8px;
+	background: rgba(0, 0, 0, .3);
 }
 
 #hotels {
 	min-width: 20%;
 	max-height: 260px;
-	/* 	position: absolute;
-	top: 50px; */
 	right: 10px;
+<<<<<<< HEAD
 	overflow: auto;
 	/* 	position: fixed;
 	top: 50px; */
+=======
+>>>>>>> 20041d30235d0cce260baa696de96c9a71bf7e21
 }
 
 #sentiment {
-	width: 100%;
-	position: absolute;
-	/*bottom: 10px;
-	right: 10px;*/
-	padding: 10px;
-	background: rgba(0, 0, 0, .3);
-	z-index: -10;
-}
-
-#feedback {
-	max-width: 600px;
-	margin-left: 20px;
+	position: relative;
+	right: -40px;
 }
 
 #rank-wrapper {
@@ -353,13 +403,28 @@ th,th>span {
 	border-top: 1px solid #ddd;
 }
 
-.table>thead>tr>th {
+.table > thead > tr > th {
 	vertical-align: bottom;
 	border-bottom: 2px solid #ddd;
 }
 
-.table-hover>tbody>tr:hover>td,.table-hover>tbody>tr:hover>th {
+.table > tbody > tr,
+.table > tbody > tr > td {
+	font-weight: 300;
+}
+
+.table-hover > tbody > tr:hover > td,
+.table-hover > tbody > tr:hover > th {
 	background-color: #555;
+}
+
+.table-hover > tbody > tr.active > td,
+.table-hover > tbody > tr.active:hover > td {
+	background-color: orange;
+}
+
+.table-hover > tbody > tr.active > td {
+	color: black;
 }
 
 /*** Rank chart ***/
