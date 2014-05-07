@@ -5,23 +5,24 @@ function barChart(div){
 	
 	var width = 256,
 		height = 86,
-		margin = {left:10, top:0, right:0, bottom:0},
+		margin = {left:0, top:0, right:10, bottom:0},
 		thickness = 8,
-		labelWidth = 80,
+		labelWidth = 70,
 		name = null,
 		data = [],
 		bar = null,
 		pos = null,
 		color = null,
 		formatText = d3.format(""),
-		callback = function(d, c){ return; };
+		callback = function(d, c){ return; },
+		selected = null;
 	
 	pos = d3.scale.ordinal()
 		.rangeRoundBands([0, height], .1, .2);
 		
 	var svg = d3.select("#"+div).append("svg")
-		.attr("width", width)
-		.attr("height", height)
+		.attr("width", width + margin.left + margin.right)
+		.attr("height", height + margin.top + margin.bottom)
 		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 	function setBoundaries() {
@@ -33,15 +34,34 @@ function barChart(div){
 			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 	};
 	
+	function clicked(id, div){
+		if(selected === id || id === null){
+			selected = null;
+			svg.selectAll(".bar").classed("over", false);
+			return;
+		}
+		
+		selected = id;
+		svg.selectAll(".bar").classed("over", function(d){ return d.key === id; });
+		callback(id, this);
+	}
+	
+	function highlight(id, div){
+		if(!selected){
+			svg.selectAll(".bar").classed("over", function(d){ return d.key === id; });
+			callback(id, this);
+		}
+	}
+	
 	chart.render = function(){
 		var rectData = svg.selectAll(".bar").data(data);
 		var labelData = svg.selectAll(".label").data(data);
 		var textData = svg.selectAll(".textbar").data(data);
 
 		pos.domain(data.map(function(d){ return d.key; }));
-		
-		bar.range([0, width]);
-		
+
+		bar.range([0, width - labelWidth - 35]);
+				
 		// Build skeleton for current data
 		rectData.enter().append("rect")
 			.attr("class", "bar")
@@ -49,8 +69,9 @@ function barChart(div){
 			.attr("y", function(d){return pos(d.key);})
 			.attr("width", 0)
 			.attr("height", thickness)
-			.on("mouseover", function(d){ callback(d.key, this); })
-			.on("mouseout", function(d){ callback(null, this); });
+			.on("mouseover", function(d){ highlight(d.key, this); })
+			.on("mouseout", function(d){ highlight(null, this); })
+			.on("click", function(d){ clicked(d.key, this); });
 
 		labelData.enter().append("text")
 			.attr("class", "label")
@@ -216,6 +237,11 @@ function barChart(div){
 		return chart;
 	};
 	
+	chart.clearSelection = function(){
+		selected = null;
+		return chart;
+	};
+	
 	return chart;
 }
 
@@ -233,7 +259,9 @@ function verticalBarChart(div){
 		pos = null,
 		color = null,
 		formatText = d3.format(""),
-		callback = function(d, c){ return; };
+		callback = function(d, c){ return; },
+		selected = null,
+		multiple = 100;
 	
 	pos = d3.scale.ordinal()
 		.domain([0, 10])
@@ -265,13 +293,32 @@ function verticalBarChart(div){
 	var gyAxis = svg.append("g")
 		.attr("class", "y axis minor");
 	
+	function clicked(id, div){
+		if(selected === id || id === null){
+			selected = null;
+			svg.selectAll(".bar").classed("over", false);
+			return;
+		}
+		
+		selected = id;
+		svg.selectAll(".bar").classed("over", function(d){ return d.key === id; });
+		callback(id, this);
+	}
+	
+	function highlight(id, div){
+		if(!selected){
+			svg.selectAll(".bar").classed("over", function(d){ return d.key === id; });
+			callback(id, this);
+		}
+	}
+
 	chart.render = function(){
 		var rectData = svg.selectAll(".bar").data(data);
 		var labelData = svg.selectAll(".label").data(data);
 		var textData = svg.selectAll(".textbar").data(data);
 		var maxValue = d3.max(data, function(d){ return d.value; });
 		
-		maxValue = parseInt((maxValue + 100 - 1)/100) * 100;
+		maxValue = parseInt((maxValue + multiple - 1)/multiple) * multiple;
 		
 		pos.domain(data.map(function(d){ return d.key; }));
 		bar.range([height, 0])
@@ -293,17 +340,18 @@ function verticalBarChart(div){
 			.attr("y", 0)
 			.attr("width", thickness)
 			.attr("height", 0)
-			.on("mouseover", function(d){ callback(d.key, this); })
-			.on("mouseout", function(d){ callback(null, this); });
-
-		textData.enter().append("text")
+			.on("mouseover", function(d){ highlight(d.key, this); })
+			.on("mouseout", function(d){ highlight(null, this); })
+			.on("click", function(d){ clicked(d.key, this); });
+			
+		/*textData.enter().append("text")
 			.attr("class", "textbar")
 			.attr("x", function(d){ return pos(d.key); })
 			.attr("y", 0)
 			.attr("dy", 10)
 			.style("fill", "white")
 			//.style("opacity", 0)
-			.style("font-weight", "bold");
+			.style("font-weight", "bold");*/
 		
 		rectData.exit().remove();
 		labelData.exit().remove();

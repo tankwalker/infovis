@@ -17,7 +17,7 @@
 <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
 <!-- <script src="js/crossfilter.min.js"></script> -->
 <script src="//cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.1/crossfilter.js"></script>
-<script src="js/jquery.sticky.js"></script>
+<!-- <script src="js/sankey.js"></script> -->
 <script src="js/interactive3.js"></script>
 <script src="js/bullet.js"></script>
 <script src="js/charts.js"></script>
@@ -43,11 +43,6 @@
 	function scroll(value) {
 		$("html,body").animate({scrollTop:value}, "slow");
 	}
-	
-	$(document).ready(function(){
-		var opt = {topSpacing: 20, rightSpacing: 10};
-		$("#hotels").sticky(opt);
-	});
 //-->
 </script>
 
@@ -58,104 +53,109 @@
 
 	<!-- Contenitore della visualizzazinoe interattiva -->
 	<div id="wrapper">
-	<header id="header">The filtered coffee survey</header>
-		<!-- Contenitore degli elementi di dettaglio della regione selezionata -->
-		<div id="lside" class="inline">
-			<h2 id="region-name">Italia</h2>
+		<header id="header">The filtered coffee survey</header>
 
-			<div id="consumes">
-				<h3>Consumo percentuale</h3>
-				<div id="consume-chart" class="chart"></div>
-			</div>
-			
-			<div id="composition">
-				<h3>Consumi di caffè</h3>
-				<div id="fan-chart" class="chart"></div>
-			</div>
-			
-			<div id="turist">
-				<h3>Composizione turisti</h3>
-				<div id="turist-chart" class="chart"></div>
-			</div>
-		</div>
+		<!-- Contenitore dei dettagli caffè, della mappa e del riepilogo strutture -->
+		<div>
 
-		<div id="map-container" class="inline">
-			<!-- Contenitore della mappa geografica interattiva -->
-			<div id="map"></div>
-		</div>
+			<!-- Contenitore degli elementi di dettaglio della regione selezionata -->
+			<div id="coffee-details" class="inline">
+				<h2 id="region-name">Italia</h2>
 
-		<div id="hotel-container" class="inline">
-		
-			<!-- Hotel rank -->
-			<!-- <div id="rank-wrapper" class="inline">
+				<div id="consumes">
+					<h3>Consumo percentuale (<span id="consume-unit"></span>)</h3>
+					<div id="consume-chart" class="chart"></div>
+				</div>
+
+				<div id="composition">
+					<h3>Consumi di caffè (<<span id="composition-unit"></span>)</h3>
+					<div id="fan-chart" class="chart"></div>
+				</div>
+			</div>
+
+			<div id="map-container" class="inline">
+				<!-- Contenitore della mappa geografica interattiva -->
+				<div id="map"></div>
+			</div>
+
+			<div id="hotel-container" class="inline">
+
+				<!-- Hotel rank -->
+				<!-- <div id="rank-wrapper" class="inline">
 				<p>Valutazione struttura</p>
 				<div id="rank"></div>
 			</div> -->
-	
-			<div id="hotels">
-				<h3 class="inline">
-					<span>
-						<img class="ball inline" src="images/info.png" style="padding: 5px">
-					</span>
-					<span id="hotels-number">NA</span> strutture presenti nella regione
-				</h3>
-				
-				<!-- Tabella dei feedback -->
-				<div class="table-wrapper">
-					<div class="table-scroll">
-						<table id="hotel-table" class="table table-hover">
-							<thead>
-							</thead>
-							<tbody>
-							</tbody>
-						</table>
-					</div>
-				</div>
-				
-			</div>
-		</div>
-	</div>
 
-	<!-- Rappresentazione della sentiment analysis con foucs sulla struttura selezionata -->
-	<div id="sentiment" style="opacity: 0; display: none;">
-		<h2>
-			Dettgli feedback: <span id="hotel-name">Regione</span>
-		</h2>
-		
-		<a id="scroll-down"><img class="inline clickable" src="images/arrow_down.png" width="25px" onclick="scroll(240)"></img></a>
-		
-		<div>
-			<!-- Sentiment analysis -->
-			<div class="inline">
-				<div id="feedback"></div>
-			</div>
-			
-			<!-- Grafico dell'andamento delle valutazioni -->
-			<div id="trend-analysis" class="inline"></div>
+				<div id="hotels">
+					<h3 class="inline">
+						<span> <img class="ball inline" src="images/info.png"
+							style="padding: 5px">
+						</span> <span id="hotels-number">NA</span> strutture presenti nella
+						regione
+					</h3>
 
-		</div>
-
-		<!-- Tabella dei feedback -->
-		<div>
-			<h3 class="inline">Feedback trend
-				<a onclick="toggleFeedList();"
-					style="cursor: pointer; margin-left: 50px">Hide feedback
-					list
-				</a>
-			</h3>
-
-			<div class="inline table-wrapper" style="display:none;">
-				<div class="table-scroll">
-					<table id="feedback-table" class="table table-hover">
+					<!-- Tabella dei feedback -->
+					<table id="hotel-table" class="table table-hover">
 						<thead>
 						</thead>
 						<tbody>
 						</tbody>
 					</table>
+
 				</div>
 			</div>
 		</div>
-		
+
+		<!-- Contenitore dell'analisi dei feedback e dei grafici temporali -->
+		<div id="feedback-details">
+			<h2>
+				Dettgli feedback <span id="hotel-name" style="display: none;">Regione</span>
+			</h2>
+
+			<!-- Grafico della composizione dei feedack dei turisti -->
+			<div id="turist" class="inline">
+				<h3>Numero feedback per nazionalità</h3>
+				<div id="turist-chart" class="chart"></div>
+			</div>
+
+			<!-- Rappresentazione della sentiment analysis con foucs sulla struttura selezionata -->
+			<div id="sentiment" class="inline">
+
+				<h3>Dettaglio delle valutazioni [ <span id="date-extent"></span> ]</h3>
+
+				<div id="feedback-analysis">
+					<!-- Sentiment analysis -->
+					<div class="inline">
+						<div id="feedback"></div>
+					</div>
+
+					<!-- Grafico dell'andamento delle valutazioni -->
+					<div id="trend-analysis" class="inline"></div>
+
+				</div>
+
+				<!-- Tabella dei feedback -->
+				<div style="display: none;">
+					<h3 class="inline">
+						Feedback trend <a onclick="toggleFeedList();"
+							style="cursor: pointer; margin-left: 50px">Hide feedback list
+						</a>
+					</h3>
+
+					<div class="inline table-wrapper" style="display: none;">
+						<div class="table-scroll">
+							<table id="feedback-table" class="table table-hover">
+								<thead>
+								</thead>
+								<tbody>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
 	</div>
 
 	<footer id="footer"></footer>

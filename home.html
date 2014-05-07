@@ -17,7 +17,7 @@
 <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
 <!-- <script src="js/crossfilter.min.js"></script> -->
 <script src="//cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.1/crossfilter.js"></script>
-<script src="js/jquery.sticky.js"></script>
+<!-- <script src="js/sankey.js"></script> -->
 <script src="js/interactive3.js"></script>
 <script src="js/bullet.js"></script>
 <script src="js/charts.js"></script>
@@ -43,11 +43,6 @@
 	function scroll(value) {
 		$("html,body").animate({scrollTop:value}, "slow");
 	}
-	
-	$(document).ready(function(){
-		var opt = {topSpacing: 20, rightSpacing: 106};
-		$("#hotels").sticky(opt);
-	});
 //-->
 </script>
 
@@ -73,7 +68,7 @@
 				</div>
 
 				<div id="composition">
-					<h3>Consumi di caffè</h3>
+					<h3>Consumi di caffè (<span id="sold-magnitude"></span> Kg)</h3>
 					<div id="fan-chart" class="chart"></div>
 				</div>
 			</div>
@@ -100,16 +95,12 @@
 					</h3>
 
 					<!-- Tabella dei feedback -->
-					<div class="table-wrapper">
-						<div class="table-scroll">
-							<table id="hotel-table" class="table table-hover">
-								<thead>
-								</thead>
-								<tbody>
-								</tbody>
-							</table>
-						</div>
-					</div>
+					<table id="hotel-table" class="table table-hover">
+						<thead>
+						</thead>
+						<tbody>
+						</tbody>
+					</table>
 
 				</div>
 			</div>
@@ -130,7 +121,7 @@
 			<!-- Rappresentazione della sentiment analysis con foucs sulla struttura selezionata -->
 			<div id="sentiment" class="inline">
 
-				<h3>Dettaglio delle valutazioni [<span id="date-extent"></span>]</h3>
+				<h3>Dettaglio delle valutazioni [ <span id="date-extent"></span> ]</h3>
 
 				<div id="feedback-analysis">
 					<!-- Sentiment analysis -->

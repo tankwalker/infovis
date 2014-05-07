@@ -36,10 +36,8 @@ h3,h3>* {
 }
 
 /****** Map ******/
-#map {
-	/* position: absolute;
-	top: 80px;
-	left: 450px; */
+#map-container {
+	width: 32%;
 }
 
 #map .background {
@@ -62,6 +60,14 @@ h3,h3>* {
 	stroke: white;
 	stroke-width: 1;
 	fill: #ddd;
+}
+
+#map .ranking {
+	stroke: #fff;
+	stroke-width: 1px;
+	fill: #ddd;
+	fill-opacity: .4;
+	pointer-events: none;
 }
 
 /*** Trend analysis ***/
@@ -164,18 +170,20 @@ text.label {
 	stroke: none;
 }
 
-<<<<<<< HEAD
-/**** Classes ****/
-.ball {
-	display: inline-block;
-	width: 15px;
-	vertical-align: middle;
-=======
 #turist-chart .x.axis text {
 	stroke-width: .8px;
 }
 
 /**** Hotel list ****/
+#hotel-container {
+	width: 34%;
+}
+
+#hotels {
+	max-height: 260px;
+	right: 10px;
+}
+
 #hotels .entry {
 	width: 250px;
 	background-color: rgba(255, 255, 255, .2);
@@ -222,12 +230,12 @@ text.label {
 
 #hotels .entry rect {
 	pointer-events: none;
->>>>>>> 20041d30235d0cce260baa696de96c9a71bf7e21
 }
 
+/**** Bullet Chart ****/
 .bullet {
 	font: 10px sans-serif;
-	display: inline-block;
+	display: block;
 }
 
 .bullet .marker {
@@ -279,44 +287,22 @@ text.label {
 	fill: #eee;
 }
 
+/**** Classes ****/
+.ball {
+	display: inline-block;
+	width: 15px;
+	vertical-align: middle;
+}
+
 .inline {
 	display: inline-block;
 	vertical-align: top;
 }
 
-.entry {
-	width: 250px;
-	background-color: rgba(255, 255, 255, .2);
-	padding: 5px;
-	margin: 1.5px;
-	color: #fff;
-	font-weight: 300;
-	font-size: 14pt;
+.clickable {
+	cursor: pointer;
 }
 
-.entry:hover {
-	background-color: rgba(255, 255, 255, .4);
-}
-
-.entry.active {
-	/* background-color: rgba(250, 120, 46, .4); */
-	background-color: orange;
-}
-
-<<<<<<< HEAD
-.visible {
-	display: block;
-}
-
-.ranking {
-	stroke: #fff;
-	stroke-width: 1.5px;
-	fill: #fff;
-	fill-opacity: .4;
-}
-
-=======
->>>>>>> 20041d30235d0cce260baa696de96c9a71bf7e21
 .invisible {
 	opacity: 0;
 }
@@ -328,25 +314,13 @@ text.label {
 }
 
 #coffee-details {
-	min-width: 30%;
+	width: 32%;
 	margin-left: 8px;
 }
 
 #feedback-details {
 	padding: 5px 8px;
 	background: rgba(0, 0, 0, .3);
-}
-
-#hotels {
-	min-width: 20%;
-	max-height: 260px;
-	right: 10px;
-<<<<<<< HEAD
-	overflow: auto;
-	/* 	position: fixed;
-	top: 50px; */
-=======
->>>>>>> 20041d30235d0cce260baa696de96c9a71bf7e21
 }
 
 #sentiment {
@@ -356,26 +330,31 @@ text.label {
 
 #rank-wrapper {
 	font-weight: 200;
-	background: rgba(255, 255, 255, .05);
-	padding: 8px 20px 10px 20px;
-	border-radius: 10px;
+	background-color: rgba(255, 255, 255, .05);
+	padding: 10px 40px 10px 40px;
+	border-radius: 15px;
 	text-align: center;
 }
 
-/*** Feedback table ***/
-#table-wrapper {
+#scroll-down {
+	position: absolute;
+	right: 50px;
+}
+
+/**** Feedback table ****/
+.table-wrapper {
 	position: relative;
-	width: 50%;
+	width: 90%;
 	margin-right: 10px;
 }
 
-#table-scroll {
+.table-scroll {
 	height: 300px;
 	overflow: auto;
 	margin-top: 20px;
 }
 
-#table-wrapper table thead th>span {
+.table-wrapper table thead th>span {
 	position: absolute;
 	top: -20px;
 }

@@ -263,7 +263,7 @@ function feedback(data){
 			.domain([0, 10]))
 		.formatText(d3.format("Kg"))
 		.callback(function(d, c){
-			d3.select(c).classed("over", d != null);
+			//d3.select(c).classed("over", d != null);
 			fb.filterCountry(d).renderAll();
 		});
 	
@@ -443,7 +443,7 @@ function feedback(data){
 		var regionValue,
 			hotelValue;
 
-		// To get region values
+		// Get region values
 		feedbackByStars.filterAll();
 		regionValue = feedbackByKey.group();
 		
@@ -538,7 +538,9 @@ function feedback(data){
 			.render();*/
 		
 		if(!hlist) {
-			fb.renderHList();
+			hotels.clearSelection()
+				.data(groupByStars.top(5))
+				.render();
 		}
 		hlist = false;
 		

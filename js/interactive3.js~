@@ -279,7 +279,6 @@ function coffeeCompBuild(){
 
 		chart.bar().domain([0, max]);		
 		chart.data(data)
-			.clearSelection()
 			.render();
 		
 		d3.select("#sold-magnitude").text(max);
@@ -333,7 +332,6 @@ function coffeeConsumeBuild(){
 		data.forEach(function(d){ d.value /= total; });
 		
 		chart.data(data)
-			.clearSelection()
 			.render();
 	}
 
