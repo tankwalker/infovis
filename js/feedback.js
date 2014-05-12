@@ -554,19 +554,6 @@ function feedback(data){
 		return fb;
 	};
 	
-	//TODO: unused
-	fb.visible = function(_bool){
-		// Show/hide the sentiment section
-		d3.select(sentimentDiv).transition()
-			.duration(duration)
-			.style("opacity", _bool ? 1 : 0)
-			.each("start", function(){
-				div.classed("invisible", _bool);
-		});
-
-		return fb;
-	};
-	
 	function hotelChange(hotel, context){
 		var stars = hotel.stars;
 		

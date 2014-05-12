@@ -15,8 +15,7 @@ function barChart(div){
 		color = null,
 		formatText = d3.format(""),
 		callback = function(d, c){ return; },
-		selected = null,
-		clickable = false;
+		selected = null;
 	
 	pos = d3.scale.ordinal()
 		.rangeRoundBands([0, height], .1, .2);
@@ -69,14 +68,10 @@ function barChart(div){
 			.attr("x", labelWidth)
 			.attr("y", function(d){return pos(d.key);})
 			.attr("width", 0)
-			.attr("height", thickness);
-		
-		if(clickable){
-			svg.selectAll(".bar")
-				.on("mouseover", function(d){ highlight(d.key, this); })
-				.on("mouseout", function(d){ highlight(null, this); })
-				.on("click", function(d){ clicked(d.key, this); });
-		}
+			.attr("height", thickness)
+			.on("mouseover", function(d){ highlight(d.key, this); })
+			.on("mouseout", function(d){ highlight(null, this); })
+			.on("click", function(d){ clicked(d.key, this); });
 
 		labelData.enter().append("text")
 			.attr("class", "label")
@@ -244,13 +239,6 @@ function barChart(div){
 	
 	chart.clearSelection = function(){
 		selected = null;
-		return chart;
-	};
-	
-	chart.clickable = function(_bool){
-		if(!arguments.length)
-			return clickable;
-		clickable = _bool;
 		return chart;
 	};
 	
@@ -499,11 +487,6 @@ function verticalBarChart(div){
 		if(!arguments.length)
 			return;
 		callback = _call;
-		return chart;
-	};
-	
-	chart.clearSelection = function(){
-		selected = null;
 		return chart;
 	};
 	

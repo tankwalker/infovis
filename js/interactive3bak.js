@@ -193,10 +193,10 @@ function mapBuild(){
 			
 			feedback.filterRegion(null)
 				.filterHotel(null)
+				.filterCountry(null)
 				.renderAll();
 			
 			regionSelected.name = "Italia";
-			regionSelected.id = 0;
 			
 		} else {
 		
@@ -215,6 +215,7 @@ function mapBuild(){
 			// List all the hotel for the selected region
 			feedback.filterRegion(regionSelected.id)
 				.filterHotel(null)
+				.filterCountry(null)
 				.renderAll();
 		}
 			
@@ -249,7 +250,7 @@ function mapBuild(){
 function coffeeCompBuild(){
 	var width = detailDim.min,
 		height = width / 3,
-		multiple = 10000;
+		multiple = 1000;
 	
 	coffeeFan.forEach(function(d){
 		d3.keys(d).forEach(function(k){
@@ -311,7 +312,7 @@ function coffeeConsumeBuild(){
 	var width = detailDim.min,
 		height = width / 3;
 	
-	coffeeConsume.forEach(function(d){
+	coffeeFan.forEach(function(d){
 		d3.keys(d).forEach(function(k){
 			if(!isNaN(d[k]))
 				d[k] = +d[k];
@@ -319,9 +320,8 @@ function coffeeConsumeBuild(){
 	});
 	
 	var xcoffee = crossfilter(coffeeConsume);
-	 coffeeByRegion = xcoffee.dimension(function(d){ return d.region; }),
-		coffeeTotal = coffeeByRegion.group(),
-		procapita = xcoffee.dimension(function(d){ return d.procapita; });
+	var coffeeByRegion = xcoffee.dimension(function(d){ return d.region; });
+	var coffeeTotal = coffeeByRegion.group();
 	
 	var bar = d3.scale.linear()
 		.domain([0, 1]);
@@ -340,17 +340,11 @@ function coffeeConsumeBuild(){
 		.formatText(percentage);
 	
 	function stateChange(region){
-		var total = coffeeByRegion.filter(0).top(1)[0];
-		var data = d3.entries(coffeeByRegion.filter(region).top(1)[0]).filter(function(d){
-			return d.key === "green" || d.key === "roasted" || d.key === "soluble" || d.key === "frozen";
-		});
+		var data = d3.entries(coffeeByRegion.filter(region).top(1)[0]).filter(function(d){ return d.key !== "region"; });
+		var total = 0;
 		
-		var green = data.filter(function(d){ return d.key === "green"; })[0].value;
-		/*data.forEach(function(d){ total += +d.value; });
-		data.forEach(function(d){ d.value /= total; });*/
-		data.forEach(function(d){
-			d.value /= green;
-		});
+		data.forEach(function(d){ total += +d.value; });
+		data.forEach(function(d){ d.value /= total; });
 		
 		chart.data(data)
 			.clearSelection()
