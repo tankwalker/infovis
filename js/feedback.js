@@ -280,7 +280,7 @@ function feedback(data){
 		.filter(function(e){ fb.filterDate(e).renderAll(); });
 	
 //	var rank = rankChart("rank");
-	var formatDate = d3.time.format("%Y-%m-%d %H:%M:%S");
+	var formatDate = d3.time.format("%Y-%m-%d");
 	
 	// Parses records to cast fields
 	data.forEach(function(d){

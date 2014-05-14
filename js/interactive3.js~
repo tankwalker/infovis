@@ -249,7 +249,7 @@ function mapBuild(){
 function coffeeCompBuild(){
 	var width = detailDim.min,
 		height = width / 3,
-		multiple = 1000;
+		multiple = 10000;
 	
 	coffeeFan.forEach(function(d){
 		d3.keys(d).forEach(function(k){

@@ -3,7 +3,7 @@ var coffeeCompUrl = "csv/coffees.csv",
 	turistCompUrl = "csv/turist.csv",
 	mapUrl = "json/ita2.json",
 	rankingUrl = "csv/ranking.csv",
-	sentimentUrl = "csv/sentiment.csv";
+	sentimentUrl = "csv/sentiment2.csv";
 
 var regionSelected = {};
 
