@@ -175,8 +175,11 @@ text.label {
 }
 
 /**** Hotel list ****/
+#hotel-container {
+	width: 34%;
+}
+
 #hotels {
-	width: 32%;
 	max-height: 260px;
 	right: 10px;
 }

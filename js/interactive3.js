@@ -5,7 +5,7 @@ var coffeeCompUrl = "csv/coffees.csv",
 	rankingUrl = "csv/ranking.csv",
 	sentimentUrl = "csv/sentiment2.csv";
 
-var regionSelected = {};
+var regionSelected = {id: 0, name: "Italia", focus: false, path: null};
 
 var ita,
 	coffeeFan,
@@ -129,7 +129,6 @@ function mapBuild(){
 			// List all the hotel for the selected region
 			feedback.filterRegion(regionSelected.id)
 				.filterHotel(null)
-				.visible(true)
 				.renderAll();
 			
 			// Show the sentiment section
@@ -160,7 +159,6 @@ function mapBuild(){
 			feedback
 				.filterRegion(null)
 				.filterHotel(null)
-				.visible(false);
 			dispatch.updateFeedback(null);
 			
 		}
@@ -239,8 +237,15 @@ function mapBuild(){
 		drawMap();
 	};
 	
+	feedback.filterRegion(null)
+				.filterHotel(null)
+				.renderAll();
+	dispatch.regionChange(0);
+	
 //	dispatch.on("resize.map", resize);
 }
+
+d3.sum(hotelTypePerRegion, function(d){ return d3.sum(return d.values(), function(o){ return d3.sum(o.values()); }); })
 
 /**
  * Builds the chart which represents the composition of coffee
@@ -267,8 +272,9 @@ function coffeeCompBuild(){
 	
 	var bar = d3.scale.linear()
 		.domain([0, 1000]);
-	
-	var kgFormat = function(d){ return d + " Kg"; };
+
+	var numberFormat = d3.format(",.0f");
+	var kgFormat = function(d){ return numberFormat(d) + " Kg"; };
 	
 	var chart = barChart("fan-chart")
 		.width(width)
@@ -340,7 +346,7 @@ function coffeeConsumeBuild(){
 		.formatText(percentage);
 	
 	function stateChange(region){
-		var total = coffeeByRegion.filter(0).top(1)[0];
+		var total = coffeeByRegion.filter(0).top(1)[0].green;
 		var data = d3.entries(coffeeByRegion.filter(region).top(1)[0]).filter(function(d){
 			return d.key === "green" || d.key === "roasted" || d.key === "soluble" || d.key === "frozen";
 		});
@@ -349,7 +355,8 @@ function coffeeConsumeBuild(){
 		/*data.forEach(function(d){ total += +d.value; });
 		data.forEach(function(d){ d.value /= total; });*/
 		data.forEach(function(d){
-			d.value /= green;
+			d.value /= total;
+			d.key = d.key.capitalize();
 		});
 		
 		chart.data(data)

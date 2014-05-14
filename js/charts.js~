@@ -3,7 +3,7 @@ function barChart(div){
 	var _id = id++;
 	var chart = {};
 	
-	var width = 256,
+	var width = 300,
 		height = 86,
 		margin = {left:0, top:0, right:10, bottom:0},
 		thickness = 8,
@@ -244,6 +244,13 @@ function barChart(div){
 	
 	chart.clearSelection = function(){
 		selected = null;
+		return chart;
+	};
+	
+	chart.clickable = function(_bool){
+		if(!arguments.length)
+			return clickable;
+		clickable = _bool;
 		return chart;
 	};
 	
@@ -506,7 +513,7 @@ function verticalBarChart(div){
 function bulletChart(divname){
 	var chart = {};
 	
-	var width = 150,
+	var width = 200,
 		height = 15,
 		margin = {top:20, right:10, bottom:15, left:10};
 	

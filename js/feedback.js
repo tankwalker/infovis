@@ -121,7 +121,9 @@ function hotelList(){
 	list.render = function(){
 		// Retrieve only the hotel whose value is != 0, so they belong to selected region
 		var hotelInRegion = data.filter(function(d){ return d.value.count; })
-			.map(function(d){ return {rank:floatFormat(d.value.rank), stars: d.key, facilities:0, feeds:d.value.count}; });
+			.map(function(d){
+				return {rank:floatFormat(d.value.rank), stars: d.key, facilities:d.value.facilities, feeds:d.value.count};
+			});
 		
 		table.data(hotelInRegion).render();
 		
@@ -145,7 +147,7 @@ function hotelList(){
 				clicked({rank: d[0].value, stars: d[1].value}, this);
 			});
 		
-		countDiv.text(hotelInRegion.length);
+		countDiv.text(hotelInRegion.total);
 	};
 	
 	list.show = function(visible){
@@ -261,7 +263,6 @@ function feedback(data){
 		.color(d3.scale.linear()
 			.range(["#6685e0", "#001a4c"])
 			.domain([0, 10]))
-		.formatText(d3.format("Kg"))
 		.callback(function(d, c){
 			//d3.select(c).classed("over", d != null);
 			fb.filterCountry(d).renderAll();
@@ -339,6 +340,12 @@ function feedback(data){
 	groupByDate.reduce(reduceToRankAdd, reduceToRankRemove, reduceToRankInit).order(function(p){ return +p.key; });
 	regionRank = feedbackByRegion.groupAll().reduce(reduceToRankAdd, reduceToRankRemove, reduceToRankInit);
 	
+	 hotelTypePerRegion = d3.nest()
+		.key(function(d){ return d.region; })
+		.key(function(d){ return d.stars; })
+		.rollup(function(d){ return d.length; })
+		.map(data, d3.map);
+	
 	/* ---- reduce functions ----*/
 	function reduceToRankAdd(p, v){
 		var mean = 0;
@@ -370,7 +377,7 @@ function feedback(data){
 	}
 	
 	function reduceToRankInit(){
-		return {rank:0, count:0};
+		return {rank:0, count:0, facilities:0};
 	}
 	
 	function reduceBulletAdd(p, v){
@@ -445,10 +452,12 @@ function feedback(data){
 
 		// Get region values
 		feedbackByStars.filterAll();
+		feedbackByCountry.filterAll();
 		regionValue = feedbackByKey.group();
 		
 		// Filter feedbacks by hotel type
 		feedbackByStars.filter(hotel);
+		feedbackByCountry.filter(country);
 		hotelValue = feedbackByKey.group();
 		
 		var bullets = {};
@@ -538,9 +547,7 @@ function feedback(data){
 			.render();*/
 		
 		if(!hlist) {
-			hotels.clearSelection()
-				.data(groupByStars.top(5))
-				.render();
+			fb.renderHList();
 		}
 		hlist = false;
 		
@@ -548,8 +555,11 @@ function feedback(data){
 	};
 	
 	fb.renderHList = function(){
+		data = groupByStars.top(5);
+		data.forEach(function(d){ d.value.facilities = hotelTypePerRegion.get(regionSelected.id).get(d.key); });
+		data.total = d3.sum(hotelTypePerRegion.get(regionSelected.id).values());
 		hotels
-			.data(groupByStars.top(5))
+			.data(data)
 			.render();
 		return fb;
 	};

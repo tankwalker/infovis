@@ -3,7 +3,7 @@ function barChart(div){
 	var _id = id++;
 	var chart = {};
 	
-	var width = 256,
+	var width = 300,
 		height = 86,
 		margin = {left:0, top:0, right:10, bottom:0},
 		thickness = 8,
@@ -341,7 +341,8 @@ function verticalBarChart(div){
 			.attr("transform", "rotate(-65)")
 			.attr("dx", "-5px")
 			.attr("dy", "-5px")
-			.style("text-anchor", "end");
+			.style("text-anchor", "end")
+			.text(function(d){ return d.capitalize(); })
 		
 		gyAxis.call(yAxis);
 		
@@ -513,7 +514,7 @@ function verticalBarChart(div){
 function bulletChart(divname){
 	var chart = {};
 	
-	var width = 150,
+	var width = 200,
 		height = 15,
 		margin = {top:20, right:10, bottom:15, left:10};
 	
