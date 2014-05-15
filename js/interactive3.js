@@ -41,7 +41,7 @@ String.prototype.capitalize = function() {
  * Builds main map which allow to select regions
  */
 function mapBuild(){
-	var width = 320,
+	var width = 350,
 		height = width;
 
 	var projection = d3.geo.albers()
@@ -141,9 +141,9 @@ function mapBuild(){
 			y = height / 2;
 			zoom = 1;
 			
-			regionSelected.name = null;
+			regionSelected.name = "Italia";
 			regionSelected.path = null;
-			regionSelected.id = null;
+			regionSelected.id = 0;
 			regionSelected.focus = false;
 			
 			// Hide the sentiment section
@@ -185,16 +185,18 @@ function mapBuild(){
 			sub.selectAll("path")
 				.classed("highlight", false);
 			
+			regionSelected.name = "Italia";
+			regionSelected.id = 0;
+			regionSelected.path = null;
+			regionSelected.focus = false;
+
 			feedback.filterRegion(null)
 				.filterHotel(null)
 				.renderAll();
 			
-			regionSelected.name = "Italia";
-			regionSelected.id = 0;
-			
 		} else {
 		
-		// Select the region
+		// Highlight the region
 			var regionName = region.properties.name;
 			var id = region.properties.id;
 
@@ -319,6 +321,11 @@ function coffeeConsumeBuild(){
 		});
 	});
 	
+	var format = d3.format(",.0f");
+	
+	var divGreenRegion = "green-region";
+	var divGreenCountry = "green-country";
+	
 	var xcoffee = crossfilter(coffeeConsume);
 	 coffeeByRegion = xcoffee.dimension(function(d){ return d.region; }),
 		coffeeTotal = coffeeByRegion.group(),
@@ -357,6 +364,12 @@ function coffeeConsumeBuild(){
 		chart.data(data)
 			.clearSelection()
 			.render();
+		
+		d3.select("#"+divGreenCountry)
+			.text(format(total));
+			
+		d3.select("#"+divGreenRegion)
+			.text(format(green));
 	}
 
 	function resize(w, h){
@@ -401,23 +414,27 @@ function onResize(){
 	//TODO: completare
 }
 
+
 /**
  * ------- Entry point --------
  * Function invoked at the end of asynchronous script
  * and object fetches through the network.
  */
 $(document).ready(function(){
+	//Progress bar
+	$("#loading").css("display", "block");
+	
 	// Declering dispatch possible events
 	dispatch = d3.dispatch("load", "regionChange", "updateFeedback","resize");	//TODO: da rivedere quali eventi lasciare
 
 	// Registering events
 	$(window).resize(onResize);		//TODO: da implementare
-	dispatch.on("load.map", mapBuild);
 	dispatch.on("load.coffee.fun", coffeeCompBuild);
 	dispatch.on("load.coffee.consume", coffeeConsumeBuild);
 	dispatch.on("regionChange.details", updateDetails);
+	dispatch.on("load.map", mapBuild);
 	
-	// Loading all data TODO: aggiungere progress bar?
+	// Loading all data
 	queue()
 		.defer(d3.csv, coffeeConsumeUrl)
 		.defer(d3.csv, coffeeCompUrl)
@@ -440,6 +457,9 @@ $(document).ready(function(){
 			facilities = _hotels;
 
 			feedback = feedback(_sentiment);
+			
+			// Disable loading bar
+			$("#loading").css("display", "none");
 			
 			// Once data is loaded, building up...
 			dispatch.load();

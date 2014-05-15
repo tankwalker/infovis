@@ -263,7 +263,7 @@ function verticalBarChart(div){
 	
 	var width = 256,
 		height = 120,
-		margin = {left:20, top:10, right:10, bottom:50},
+		margin = {left:20, top:10, right:10, bottom:80},
 		thickness = 12,
 		name = null,
 		data = [],
@@ -723,7 +723,7 @@ function bulletChart(divname){
 function lineChart(divName){
 	var chart = {};
 	
-	var width = 450,
+	var width = 700,
 		height = 180,
 		margin = {left:20, top:25, right:20, bottom:25},
 		thickness = 1.5,
@@ -746,7 +746,7 @@ function lineChart(divName){
 	var xAxis = d3.svg.axis()
 		.scale(x)
 		.orient("bottom")
-		.ticks(d3.time.month, 3)
+		.ticks(d3.time.month, 4)
 		.tickFormat(d3.time.format("%b %Y"))
 		.tickPadding(8)
 		.tickSize(3)
@@ -765,12 +765,12 @@ function lineChart(divName){
 		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 	
 	var line = d3.svg.line()
-		.interpolate("cardinal")
+		.interpolate("monotone")
 		.x(function(d){ return x(getX(d)); })
 		.y(function(d){ return y(getY(d)); });
 	
 	var area = d3.svg.area()
-		.interpolate("cardinal")
+		.interpolate("monotone")
 		.x(function(d){ return x(getX(d)); })
 		.y0(height)
 		.y1(function(d){ return y(getY(d)); });
@@ -798,25 +798,16 @@ function lineChart(divName){
 			brushFilter(null);
 	}
 	
-//	x.domain(d3.extent(data, getX));
-	x.domain([d3.time.year.offset(new Date(), -2), new Date()]);
 	y.domain([0, 5]);
 	
 	// Build skeleton
 	// x axis
-	svg.append("g")
+	var gxAxis = svg.append("g")
 		.attr("class", "x axis")
-		.attr("transform", "translate(0," + height + ")")
-		.call(xAxis)
-		.append("text")
-		.data(xAxisLabel)
-		.attr("y", 6)
-		.attr("dy", ".71em")
-		.style("text-anchor", "end")
-		.text(function(d){ return d; });
+		.attr("transform", "translate(0," + height + ")");
 
 	// y axis
-	svg.append("g")
+	var gyAxis = svg.append("g")
 		.attr("class", "y axis")
 		.call(yAxis)
 		.append("text")
@@ -828,8 +819,8 @@ function lineChart(divName){
 		.text(function(d){ return d; });
 	
 	// area
-	svg.append("path")
-		.attr("class", "area");
+	/*svg.append("path")
+		.attr("class", "area");*/
 	
 	// line
 	svg.append("path")
@@ -856,6 +847,29 @@ function lineChart(divName){
 		.attr("width", 10)
 		.attr("height", 80);
 	
+	/*var xscale = d3.scale.linear().domain([0, new Date()]).range([0, width]),
+		yscale = d3.scale.linear().domain([0, 100]).range([height, 0]);
+	
+	var zoom = d3.behavior.zoom()
+		.scaleExtent([1, 1])
+		.x(xscale)
+		.on('zoom', function() {
+		  svg.select('.data').attr('d', line)
+		});
+
+	svg.call(zoom);
+	
+	zoom.on('zoom', function() {
+		var t = zoom.translate(),
+		tx = t[0],
+		ty = t[1];
+	
+		tx = Math.min(tx, 0);
+		tx = Math.max(tx, width - new Date());
+		zoom.translate([tx, ty]);
+
+		svg.select('.data').attr('d', line);
+	});*/
 	
 	chart.render = function(){
 		// Update data
@@ -864,6 +878,17 @@ function lineChart(divName){
 			console.warn(error.message);
 			return error;
 		}
+		
+		x.domain(d3.extent(data, getX));
+		
+		// update axis
+		gxAxis.call(xAxis)
+			.append("text")
+			.data(xAxisLabel)
+			.attr("y", 6)
+			.attr("dy", ".71em")
+			.style("text-anchor", "end")
+			.text(function(d){ return d; });
 		
 		// line
 		svg.select(".line").datum(data)

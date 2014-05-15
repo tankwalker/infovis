@@ -55,6 +55,11 @@
 	<div id="wrapper">
 		<header id="header">The filtered coffee survey</header>
 
+		<!-- Progress bar div -->
+		<div id="loading" style="display: block">
+			<img src="images/loading.gif"/>
+		</div>
+
 		<!-- Contenitore dei dettagli caffè, della mappa e del riepilogo strutture -->
 		<div>
 
@@ -63,7 +68,10 @@
 				<h2 id="region-name">Italia</h2>
 
 				<div id="consumes">
-					<h3>Percentage by coffee's category</h3>
+					<h3>Country's percentage by category</h3>
+					<div style="font-size:10pt;">Total green coffe imported: <span id="green-country" style="font-weight: 300;"></span> Kg</div>
+					<div style="font-size:10pt;">Region's green consumption: <span id="green-region" style="font-weight: 300;"></span> Kg</div>
+					<br/>
 					<div id="consume-chart" class="chart"></div>
 				</div>
 
@@ -87,12 +95,11 @@
 			</div> -->
 
 				<div id="hotels">
-					<!-- <h3 class="inline">
+					<h3 class="inline">
 						<span> <img class="ball inline" src="images/info.png"
 							style="padding: 5px">
-						</span> <span id="hotels-number">NA</span> strutture presenti nella
-						regione
-					</h3> -->
+						</span> <span id="hotels-number">NA</span> facilities in the selected region
+					</h3>
 
 					<!-- Tabella dei feedback -->
 					<table id="hotel-table" class="table table-hover">
@@ -114,7 +121,7 @@
 
 			<!-- Grafico della composizione dei feedack dei turisti -->
 			<div id="turist" class="inline">
-				<h3>Feedback count per country</h3>
+				<h3>Feedback count per nationality</h3>
 				<div id="turist-chart" class="chart"></div>
 			</div>
 

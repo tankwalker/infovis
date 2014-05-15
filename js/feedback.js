@@ -102,8 +102,6 @@ function hotelList(){
 	
 	var floatFormat = d3.format(".2r");
 	
-	var countDiv = d3.select("#hotels-number");
-	
 	function clicked(hotel, div){
 		var id = hotel.stars;
 
@@ -122,10 +120,8 @@ function hotelList(){
 		// Retrieve only the hotel whose value is != 0, so they belong to selected region
 		var hotelInRegion = data.filter(function(d){ return d.value.count; })
 			.map(function(d){
-				return {rank:floatFormat(d.value.rank), stars: d.key, facilities:d.value.facilities, feeds:d.value.count};
+				return {rank:floatFormat(d.value.rank), stars: d.key, facilities:d.value.facilities, feeds:d.value.count, total: d.total};
 			});
-		
-		console.log(data);
 		
 		table.data(hotelInRegion).render();
 		
@@ -148,8 +144,6 @@ function hotelList(){
 				hlist = true;
 				clicked({rank: d[0].value, stars: d[1].value}, this);
 			});
-		
-		countDiv.text(hotelInRegion.total);
 	};
 	
 	list.show = function(visible){
@@ -562,9 +556,13 @@ function feedback(data){
 	};
 	
 	fb.renderHList = function(){
+		var countDiv = d3.select("#hotels-number");
+
 		data = groupByStars.top(5);
 		data.forEach(function(d){ d.value.facilities = hotelTypePerRegion.get(regionSelected.id)[d.key]; });
-		data.total = hotelTypePerRegion.get(0).total;
+		
+		countDiv.text(hotelTypePerRegion.get(regionSelected.id).total);
+
 		hotels
 			.data(data)
 			.render();
