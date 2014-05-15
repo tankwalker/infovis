@@ -1,5 +1,6 @@
 var coffeeCompUrl = "csv/coffees.csv",
 	coffeeConsumeUrl = "csv/consume.csv",
+	hotelsUrl = "csv/hotels2.csv",
 	turistCompUrl = "csv/turist.csv",
 	mapUrl = "json/ita2.json",
 	rankingUrl = "csv/ranking.csv",
@@ -10,16 +11,11 @@ var regionSelected = {id: 0, name: "Italia", focus: false, path: null};
 var ita,
 	coffeeFan,
 	coffeeConsume,
+	facilities,
 	turist,
 	ranking,
 	sentiment,
 	feedback;
-
-var feedbackByRegion,
-	feedbackByHotel,
-	feedbackByHotelFilter,
-	feedbackByCountry,
-	feedbackByKey;
 
 var window = {};
 window.w = $(window).width();
@@ -245,7 +241,6 @@ function mapBuild(){
 //	dispatch.on("resize.map", resize);
 }
 
-d3.sum(hotelTypePerRegion, function(d){ return d3.sum(return d.values(), function(o){ return d3.sum(o.values()); }); })
 
 /**
  * Builds the chart which represents the composition of coffee
@@ -430,19 +425,21 @@ $(document).ready(function(){
 		.defer(d3.csv, sentimentUrl)
 		.defer(d3.json, mapUrl)
 		.defer(d3.csv, rankingUrl)
-		.await(function(error, _coffeeConsume, _coffeeFan, _turist, _sentiment, _ita, _ranking){
+		.defer(d3.csv, hotelsUrl)
+		.await(function(error, _coffeeConsume, _coffeeFan, _turist, _sentiment, _ita, _ranking, _hotels){
 			if(error){
 				console.err(error);
 				return error;
 			}
-			
-			feedback = feedback(_sentiment);
 			
 			// Binding data
 			coffeeConsume = _coffeeConsume;
 			coffeeFan = _coffeeFan;
 			ita = _ita;
 			ranking = _ranking;
+			facilities = _hotels;
+
+			feedback = feedback(_sentiment);
 			
 			// Once data is loaded, building up...
 			dispatch.load();
